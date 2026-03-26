@@ -1,0 +1,12 @@
+torch
+transformers
+datasets
+scikit-learn
+rank-bm25
+pandas
+nltk
+evaluate
+bert-score
+rouge-score
+pytest
+pyyaml
