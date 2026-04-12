@@ -492,3 +492,56 @@ def test_load_trained_model_and_tokenizer_supports_lora_checkpoint(tmp_path, mon
     assert tokenizer.pad_token == tokenizer.eos_token
     assert observed["base_model"] == "distilgpt2"
     assert observed["adapter_dir"] == str(tmp_path)
+
+
+def test_inspect_token_stats_passes_context_size_to_budget_summary(tmp_path, monkeypatch, capsys):
+    script_path = Path(__file__).resolve().parents[2] / "scripts" / "inspect_token_stats.py"
+    spec = importlib.util.spec_from_file_location("inspect_token_stats", script_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError("Expected inspect_token_stats.py to be importable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    config_path = tmp_path / "config.yaml"
+    config_path.write_text("model_name: distilgpt2\n", encoding="utf-8")
+    output_path = tmp_path / "stats.json"
+
+    observed = {"calls": []}
+
+    monkeypatch.setattr(
+        module,
+        "load_training_config",
+        lambda _path: {
+            "model_name": "distilgpt2",
+            "train_path": "train.jsonl",
+            "eval_path": "eval.jsonl",
+            "context_format": "plain",
+            "context_size": 2,
+            "max_length": 512,
+            "use_retrieval": False,
+        },
+    )
+    monkeypatch.setattr(module, "load_model_and_tokenizer", lambda _name: (object(), object()))
+    monkeypatch.setattr(
+        module,
+        "load_jsonl_records",
+        lambda _path: [{"context": ["p0", "p1"], "target": "p2"}],
+    )
+    monkeypatch.setattr(module, "resolve_max_target_tokens", lambda _config, _records, _tokenizer: 128)
+
+    def fake_summarise(records, tokenizer, **kwargs):
+        observed["calls"].append(kwargs)
+        return {
+            "avg_total_tokens": 12.0,
+            "max_total_tokens": 16.0,
+            "truncation_rate": 0.0,
+        }
+
+    monkeypatch.setattr(module, "summarise_token_budget", fake_summarise)
+    monkeypatch.setattr(sys, "argv", ["inspect_token_stats.py", "--config", str(config_path), "--output-path", str(output_path)])
+
+    module.main()
+
+    assert output_path.exists()
+    assert len(observed["calls"]) == 2
+    assert all(call["context_size"] == 2 for call in observed["calls"])

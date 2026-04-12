@@ -4,26 +4,63 @@
 
 - E1-E5 是主实验
 - retrieval 只作为 appendix / 附加实验
-- 主要运行目录是仓库里的 `codex-novel-continuation/`
+- 主要运行目录是压缩包里的 `codex-novel-continuation/`
 
 推荐直接使用同目录下的 notebook：
 
 - `docs/ST456_colab_一键运行.ipynb`
 
-这个 notebook 设计成适合在 Colab 里直接点击 `Run all`。你只需要先改参数区里的仓库地址和开关。
+现在这套方案已经改成：
+
+- 不用 GitHub
+- 不用 `git clone`
+- 直接把本地项目压成 zip 上传到 Colab
 
 ---
 
-## 1. 为什么建议用 Colab
+## 1. 你需要准备什么
 
-- `distilgpt2`、`LoRA`、自动评估这些步骤更适合在 Colab GPU 上跑
+你只需要准备两个东西：
+
+1. 一个项目压缩包
+2. 这个 notebook 文件
+
+### 项目压缩包建议怎么做
+
+建议把整个项目根目录压成一个 zip，也就是把这个文件夹打包：
+
+- `D:\111_temu_商品\gaogou456\ST456group`
+
+推荐压缩包命名：
+
+- `ST456group.zip`
+
+压缩包里至少要包含：
+
+- `codex-novel-continuation/`
+- `docs/`
+- `proposal.md`
+
+最关键的是 `codex-novel-continuation/` 必须在压缩包里。
+
+### Notebook 文件
+
+上传这个文件到 Colab：
+
+- `docs/ST456_colab_一键运行.ipynb`
+
+---
+
+## 2. 为什么建议用 Colab
+
+- `distilgpt2`、LoRA、自动评估这些步骤更适合在 Colab GPU 上跑
 - 项目现在已经按 Colab-first 方式整理过
 - 主线实验 E1-E5、自动评估和人评导出都已经有脚本入口
-- 本地环境不需要先完全配置好，也能推进主要实验
+- 本地不需要先把环境完全配好，也能推进主要实验
 
 ---
 
-## 2. 这次要跑什么
+## 3. 这次要跑什么
 
 主实验矩阵固定为：
 
@@ -48,54 +85,73 @@
 
 ---
 
-## 3. 推荐的使用方式
+## 4. 推荐的使用方式
 
-### 方式 A：直接上传 notebook 到 Colab
+### 第一步：打开 Colab
 
 1. 打开 [Google Colab](https://colab.research.google.com/)
 2. 选择“上传”
 3. 上传：
    - `docs/ST456_colab_一键运行.ipynb`
-4. 打开 notebook 后，把第一段参数里的：
-   - `REPO_URL`
-   - `REPO_DIR_NAME`
-   - 是否跑完整主线
-   - 是否跑 appendix retrieval
-   改好
-5. 选择：
-   - `Runtime -> Change runtime type -> GPU`
-6. 点击：
+
+### 第二步：打开 GPU
+
+在 Colab 菜单里选择：
+
+- `Runtime -> Change runtime type -> GPU`
+
+### 第三步：运行 notebook
+
+1. 先看第一格参数区
+2. 按需要修改：
+   - `USE_GOOGLE_DRIVE`
+   - `RUN_FULL_MAINLINE`
+   - `RUN_APPENDIX_RETRIEVAL`
+   - `DOWNLOAD_RESULTS_ZIP`
+3. 点击：
    - `Runtime -> Run all`
 
-### 方式 B：先把仓库推到 GitHub，再从 Colab 打开
+### 第四步：上传 zip
 
-如果你们已经把这份 notebook 提交进仓库，也可以直接在 Colab 里从 GitHub 打开它，然后同样执行 `Run all`。
+运行到上传步骤时，Colab 会弹出上传控件。
+
+你只需要上传：
+
+- `ST456group.zip`
+
+notebook 会自动：
+
+- 解压压缩包
+- 找到 `codex-novel-continuation/`
+- 进入该目录
+- 安装依赖并继续运行
 
 ---
 
-## 4. Notebook 会自动做什么
+## 5. Notebook 会自动做什么
 
 按默认流程，notebook 会：
 
 1. 可选挂载 Google Drive
-2. clone / 更新仓库
-3. 进入 `codex-novel-continuation/`
-4. 安装 `requirements.txt`
-5. 下载 Sherlock Holmes 数据
-6. 构建 `train/val/test` 数据集
-7. 跑 token budget 检查
-8. 训练主实验
-9. 生成样本
-10. 计算自动评估指标
-11. 导出人工评测 CSV
-12. 可选跑 retrieval appendix
-13. 可选打包并下载结果
+2. 让你上传 `ST456group.zip`
+3. 自动解压 zip
+4. 自动找到 `codex-novel-continuation/`
+5. 安装 `requirements.txt`
+6. 下载 Sherlock Holmes 数据
+7. 构建 `train/val/test` 数据集
+8. 跑 token budget 检查
+9. 训练主实验
+10. 生成样本
+11. 计算自动评估指标
+12. 导出人工评测 CSV
+13. 可选跑 retrieval appendix
+14. 可选打包并下载结果
 
 ---
 
-## 5. 参数建议
+## 6. 参数建议
 
-### 最稳妥的第一次运行
+### 第一次最稳妥的设置
 
 第一次建议这样设置：
 
@@ -124,11 +180,11 @@
 
 - `USE_GOOGLE_DRIVE = True`
 
-否则可以先用临时目录快速试跑。
+否则可以先用 Colab 临时目录快速试跑。
 
 ---
 
-## 6. 关键输出文件
+## 7. 关键输出文件
 
 主实验输出会在 `codex-novel-continuation/` 下生成：
 
@@ -147,7 +203,7 @@
 
 ---
 
-## 7. 常见问题
+## 8. 常见问题
 
 ### 1. Colab 提示没有 GPU
 
@@ -155,18 +211,19 @@
 
 - `Runtime -> Change runtime type -> GPU`
 
-### 2. `REPO_URL` 没填导致 clone 失败
+### 2. 上传 zip 后找不到 `codex-novel-continuation/`
 
 解决方法：
 
-- 把参数区里的 `REPO_URL` 改成你们真实的 GitHub 仓库地址
+- 检查压缩包里是否真的包含 `codex-novel-continuation` 文件夹
+- 最稳妥的方式是直接把整个 `ST456group` 文件夹压缩，而不是只挑部分文件
 
 ### 3. E3-E5 太慢或显存紧张
 
 先看 notebook 自动输出的 token stats：
 
 - 如果 `max_length=512` 截断率太高，可以把对应 config 改成 `768`
-- 如果 LoRA 或 aux objective 太慢，先只跑 E1 smoke 验证整条链路
+- 如果 LoRA 或 auxiliary objective 太慢，先只跑 E1 smoke 验证整条链路
 
 ### 4. 结果丢失
 
@@ -187,7 +244,7 @@ retrieval 只保留为 appendix / optional ablation。
 
 ---
 
-## 8. 推荐执行顺序
+## 9. 推荐执行顺序
 
 建议按下面顺序推进：
 
@@ -199,7 +256,7 @@ retrieval 只保留为 appendix / optional ablation。
 
 ---
 
-## 9. 相关文件
+## 10. 相关文件
 
 - 主 notebook：`docs/ST456_colab_一键运行.ipynb`
 - 主 Colab 说明：`codex-novel-continuation/docs/colab-run-guide.md`

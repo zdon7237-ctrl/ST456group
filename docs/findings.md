@@ -55,6 +55,9 @@ Updated: 2026-04-10 (implementation sync)
 - Retrieval remains available as appendix code and config, but not as the main project storyline
 - A clear `gpt2` comparison path is still not implemented
 - A root-level Chinese Colab guide and a run-all notebook now exist for easier handoff and execution
+- The root-level Colab entry path now uses direct ZIP upload instead of GitHub cloning
+- The root-level Colab notebook itself is now Chinese-language, not just the guide
+- `inspect_token_stats.py` was missing the new `context_size` argument when calling the token-budget summary helper; this caused the Colab token-inspection step to fail before training started
 
 ---
 
@@ -64,7 +67,7 @@ Updated: 2026-04-10 (implementation sync)
 - Local verification still matters because it catches obvious regressions before Colab runs
 - The fresh-checkout dataset-builder import issue has been fixed in tests
 - Local retrieval code now has a fallback path when `rank_bm25` is unavailable
-- The full local test suite currently verifies as `60 passed`
+- The full local test suite currently verifies as `65 passed`
 
 ---
 
@@ -76,6 +79,9 @@ Updated: 2026-04-10 (implementation sync)
 | Treat Google Colab as the primary runtime | Matches the actual intended experiment environment |
 | Use the updated root proposal as the reference point for future changes | Prevents the repo from drifting back to the old retrieval-first framing |
 | Prioritize proposal alignment and evaluation alignment before larger new experiments | This reduces submission risk fastest |
+| Set `num_train_epochs: 3` across all configs | 1 epoch is insufficient for fine-tuning; proposal mentions epoch tuning |
+| Set `warmup_steps: 20` across all configs | Proposal explicitly mentions warmup; 0 was inconsistent |
+| Enable nucleus sampling by default in generation | Proposal cites Holtzman et al.; greedy decoding was inconsistent with the reference |
 
 ---
 
@@ -101,6 +107,7 @@ Updated: 2026-04-10 (implementation sync)
 | Local pytest collection issue in dataset-builder tests | resolved |
 | Planning catchup script could not run locally because Python access was denied in this environment | noted |
 | Colab smoke run has not been executed yet | open |
+| Root-level Colab path originally depended on GitHub clone | resolved by switching to ZIP upload |
 
 ---
 

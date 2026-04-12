@@ -73,7 +73,12 @@ def compute_perplexity(model, tokenizer, texts: list[str]) -> float:
         raise ValueError("texts must not be empty")
 
     losses: list[float] = []
-    for text in texts:
+    try:
+        from tqdm import tqdm
+        text_iter = tqdm(texts, desc="计算 perplexity", unit="条")
+    except ImportError:
+        text_iter = texts
+    for text in text_iter:
         encoded = tokenizer(text, return_tensors="pt", truncation=True)
         with torch.no_grad():
             outputs = model(**encoded, labels=encoded["input_ids"])

@@ -26,12 +26,17 @@ Tracking files were added on 2026-04-10 to make follow-up work easier to inspect
 - [x] Colab guides rewritten for the E1-E5 main line
 - [x] Root-level Chinese Colab guide added under `docs/`
 - [x] Root-level run-all Colab notebook added under `docs/`
+- [x] Root-level Colab entry switched from GitHub clone mode to direct ZIP upload mode
+- [x] Root-level Colab notebook instructions translated to Chinese
 - [x] Tracking files created under `docs/`
 - [x] Proposal-aligned experiment configs for E1-E5 added
 - [x] `LoRA` support added
 - [x] Auxiliary objective switching added for `none` / `ranking` / `classification`
 - [x] Auto-eval updated to output `perplexity`, `bertscore_f1`, `rouge_l`, and `entity_overlap`
 - [x] Local pytest suite is green
+- [x] All E1-E5 configs updated: `num_train_epochs` 1→3, `warmup_steps` 0→20
+- [x] `generate_samples.py` updated: nucleus sampling enabled by default (`do_sample=True, top_p=0.95, temperature=0.8`)
+- [x] `inspect_token_stats.py` fixed to pass `context_size` through the token-budget path
 
 ---
 
@@ -75,7 +80,12 @@ Tracking files were added on 2026-04-10 to make follow-up work easier to inspect
 - 2026-04-10: Added E1-E5 configs, a generic `train_experiment.py` entrypoint, and a token inspection script.
 - 2026-04-10: Rewrote README and Colab guides around the E1-E5 main line and moved retrieval to appendix status.
 - 2026-04-10: Added `docs/COLAB使用指南.md` and `docs/ST456_colab_一键运行.ipynb` for direct Colab use from the repo root.
-- 2026-04-10: Verified the local pytest suite with `60 passed`.
+- 2026-04-12: Reworked the root-level Colab guide and notebook so they no longer depend on GitHub and instead use direct ZIP upload in Colab.
+- 2026-04-12: Translated the root-level Colab notebook instructions, comments, and runtime messages into Chinese.
+- 2026-04-12: Fixed the Colab token-stats regression in `scripts/inspect_token_stats.py` by passing `context_size` into the budget summary path.
+- 2026-04-12: Verified the local pytest suite with `65 passed`.
+- 2026-04-12: Proposal alignment audit: updated all E1-E5 configs to `num_train_epochs: 3` and `warmup_steps: 20` to match proposal claims.
+- 2026-04-12: Added nucleus sampling support to `generate_samples.py` (`do_sample=True, top_p=0.95, temperature=0.8`) to align with Holtzman et al. reference in proposal.
 
 ---
 

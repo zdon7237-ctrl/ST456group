@@ -466,7 +466,12 @@ def _build_hf_trainer(config: dict, prepared_train: list[dict], prepared_eval: l
 
             return (total_loss, outputs) if return_outputs else total_loss
 
-    training_args = TrainingArguments(
+    # Build TrainingArguments with compatibility for both old and new
+    # versions of transformers (eval_strategy was called
+    # evaluation_strategy before transformers 4.46).
+    import transformers as _tf
+
+    _common_args = dict(
         output_dir=config["output_dir"],
         per_device_train_batch_size=int(config["batch_size"]),
         per_device_eval_batch_size=int(config["batch_size"]),
@@ -477,7 +482,6 @@ def _build_hf_trainer(config: dict, prepared_train: list[dict], prepared_eval: l
         save_steps=int(config["save_steps"]),
         warmup_steps=int(config.get("warmup_steps", 0)),
         max_grad_norm=float(config.get("max_grad_norm", 1.0)),
-        evaluation_strategy="epoch",
         save_strategy="epoch",
         load_best_model_at_end=True,
         metric_for_best_model="eval_loss",
@@ -485,13 +489,26 @@ def _build_hf_trainer(config: dict, prepared_train: list[dict], prepared_eval: l
         remove_unused_columns=False,
         report_to=[],
     )
+    if tuple(int(x) for x in _tf.__version__.split(".")[:2]) >= (4, 46):
+        _common_args["eval_strategy"] = "epoch"
+    else:
+        _common_args["evaluation_strategy"] = "epoch"
+
+    training_args = TrainingArguments(**_common_args)
+
+    # In transformers >= 4.46, 'tokenizer' was renamed to 'processing_class'.
+    _tokenizer_kwarg = (
+        {"processing_class": tokenizer}
+        if tuple(int(x) for x in _tf.__version__.split(".")[:2]) >= (4, 46)
+        else {"tokenizer": tokenizer}
+    )
 
     return ProposalAlignedTrainer(
         model=model,
         args=training_args,
         train_dataset=ListDataset(prepared_train),
         eval_dataset=ListDataset(prepared_eval),
-        tokenizer=tokenizer,
+        **_tokenizer_kwarg,
         data_collator=ContinuationDataCollator(
             tokenizer,
             max_length=int(config["max_length"]),

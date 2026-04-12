@@ -12,10 +12,11 @@ max_target_tokens: auto
 num_negative_candidates: 3
 batch_size: 2
 gradient_accumulation_steps: 4
-num_train_epochs: 1
+num_train_epochs: 3
 learning_rate: 5.0e-5
 logging_steps: 10
 save_steps: 50
+warmup_steps: 20
 selection_metric: perplexity
 use_retrieval: false
 top_k: 0

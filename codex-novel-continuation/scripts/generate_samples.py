@@ -78,6 +78,9 @@ def generate_rows(
     history_rows: list[dict] | None = None,
     top_k: int = 2,
     context_format: str | None = None,
+    do_sample: bool = True,
+    top_p: float = 0.95,
+    temperature: float = 0.8,
 ) -> list[dict]:
     if not model_dir.exists():
         raise FileNotFoundError(
@@ -96,7 +99,12 @@ def generate_rows(
     resolved_context_size = int(saved_config.get("context_size", len(rows[0]["context"]) if rows else 1))
 
     generated_rows: list[dict] = []
-    for row in rows:
+    try:
+        from tqdm import tqdm
+        row_iter = tqdm(rows, desc="生成样本", unit="条")
+    except ImportError:
+        row_iter = rows
+    for row in row_iter:
         context_window = select_context_window(row["context"], resolved_context_size)
         retrieved_items = row.get("retrieved", [])
         retrieved_texts = [item["text"] for item in retrieved_items]
@@ -110,6 +118,9 @@ def generate_rows(
         generated_ids = model.generate(
             **encoded,
             max_new_tokens=max_new_tokens,
+            do_sample=do_sample,
+            top_p=top_p if do_sample else None,
+            temperature=temperature if do_sample else None,
             pad_token_id=tokenizer.eos_token_id,
         )
         full_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
@@ -141,6 +152,13 @@ def main() -> None:
     parser.add_argument("--output-path", type=Path, default=DEFAULT_OUTPUT_PATH)
     parser.add_argument("--history-path", type=Path, default=DEFAULT_HISTORY_PATH)
     parser.add_argument("--max-new-tokens", type=int, default=80)
+    parser.add_argument("--do-sample", action="store_true", default=True,
+                        help="Enable sampling; disable with --no-do-sample for greedy decoding.")
+    parser.add_argument("--no-do-sample", dest="do_sample", action="store_false")
+    parser.add_argument("--top-p", type=float, default=0.95,
+                        help="Nucleus sampling probability threshold (default: 0.95).")
+    parser.add_argument("--temperature", type=float, default=0.8,
+                        help="Sampling temperature (default: 0.8).")
     parser.add_argument("--top-k", type=int, default=2)
     parser.add_argument("--use-retrieval", action="store_true")
     parser.add_argument("--context-format", choices=["plain", "structured"], default=None)
@@ -156,6 +174,9 @@ def main() -> None:
         history_rows=history_rows,
         top_k=args.top_k,
         context_format=args.context_format,
+        do_sample=args.do_sample,
+        top_p=args.top_p,
+        temperature=args.temperature,
     )
     write_jsonl(generated_rows, args.output_path)
 
