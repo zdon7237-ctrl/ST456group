@@ -7,18 +7,24 @@ import re
 from pathlib import Path
 
 
-START_PATTERN = re.compile(r"\*\*\*\s*START OF (?:THE|THIS) PROJECT GUTENBERG EBOOK", re.IGNORECASE)
-END_PATTERN = re.compile(r"\*\*\*\s*END OF (?:THE|THIS) PROJECT GUTENBERG EBOOK", re.IGNORECASE)
+START_PATTERN = re.compile(
+    r"^\*\*\*\s*START OF (?:THE|THIS) PROJECT GUTENBERG EBOOK.*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+END_PATTERN = re.compile(
+    r"^\*\*\*\s*END OF (?:THE|THIS) PROJECT GUTENBERG EBOOK.*$",
+    re.IGNORECASE | re.MULTILINE,
+)
 HEADING_TOKEN_PATTERN = re.compile(r"^[A-Z0-9][A-Z0-9\s'.,:&-]*$")
 ROMAN_NUMERAL_PATTERN = re.compile(r"^[IVXLCDM]+$", re.IGNORECASE)
 
 
 def strip_gutenberg_boilerplate(text: str) -> str:
     start_match = START_PATTERN.search(text)
-    end_match = END_PATTERN.search(text)
-
     if start_match:
         text = text[start_match.end() :]
+
+    end_match = END_PATTERN.search(text)
     if end_match:
         text = text[: end_match.start()]
     return text.strip()

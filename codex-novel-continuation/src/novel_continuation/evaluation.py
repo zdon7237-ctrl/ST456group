@@ -81,7 +81,25 @@ def compute_perplexity(model, tokenizer, texts: list[str]) -> float:
     return float(math.exp(sum(losses) / len(losses)))
 
 
-def evaluate_generated_rows(rows: list[dict[str, str]]) -> dict[str, float]:
+def compute_weighted_kappa(first_rater_scores: list[int], second_rater_scores: list[int] | None) -> float | None:
+    if second_rater_scores is None:
+        return None
+    if len(first_rater_scores) != len(second_rater_scores):
+        raise ValueError("Rater score lists must have the same length")
+
+    from sklearn.metrics import cohen_kappa_score
+
+    return float(cohen_kappa_score(first_rater_scores, second_rater_scores, weights="quadratic"))
+
+
+def evaluate_generated_rows(
+    rows: list[dict[str, str]],
+    *,
+    model=None,
+    tokenizer=None,
+    bertscore_fn=compute_bertscore,
+    perplexity_fn=compute_perplexity,
+) -> dict[str, float]:
     if not rows:
         raise ValueError("rows must not be empty")
 
@@ -102,11 +120,21 @@ def evaluate_generated_rows(rows: list[dict[str, str]]) -> dict[str, float]:
         compute_entity_overlap(row["prompt"], row["generated_text"])
         for row in rows
     ]
-    return {
+    metrics = {
         "num_samples": float(len(rows)),
         "rouge_l": sum(rouge_scores) / len(rouge_scores),
         "entity_overlap": sum(entity_scores) / len(entity_scores),
     }
+    metrics["bertscore_f1"] = float(
+        bertscore_fn(
+            [row["gold_target"] for row in rows],
+            [row["generated_text"] for row in rows],
+        )
+    )
+    if model is not None and tokenizer is not None:
+        texts = [f"{row['prompt']}\n\n[TARGET]\n{row['gold_target']}" for row in rows]
+        metrics["perplexity"] = float(perplexity_fn(model, tokenizer, texts))
+    return metrics
 
 
 def write_metrics_csv(metrics: dict[str, float], output_path: Path) -> None:

@@ -1,5 +1,7 @@
 torch
 transformers
+accelerate
+peft
 datasets
 scikit-learn
 rank-bm25

@@ -7,6 +7,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 from novel_continuation.evaluation import (
     compute_entity_overlap,
     compute_rouge_l,
+    compute_weighted_kappa,
     evaluate_generated_rows,
 )
 
@@ -103,3 +104,31 @@ def test_prepare_human_eval_uses_project_root_defaults():
 
     assert module.DEFAULT_INPUT_PATH == module.PROJECT_ROOT / "artifacts" / "eval" / "generated_samples.jsonl"
     assert module.DEFAULT_OUTPUT_PATH == module.PROJECT_ROOT / "artifacts" / "eval" / "human_eval.csv"
+
+
+def test_evaluate_generated_rows_returns_proposal_aligned_metric_keys():
+    rows = [
+        {
+            "prompt": "[CONTEXT]\nHolmes spoke.",
+            "gold_target": "Watson replied.",
+            "generated_text": "Watson replied calmly.",
+        }
+    ]
+
+    metrics = evaluate_generated_rows(
+        rows,
+        model=object(),
+        tokenizer=object(),
+        bertscore_fn=lambda refs, gens: 0.42,
+        perplexity_fn=lambda model, tokenizer, texts: 12.5,
+    )
+
+    assert metrics["num_samples"] == 1.0
+    assert metrics["perplexity"] == 12.5
+    assert metrics["bertscore_f1"] == 0.42
+    assert "rouge_l" in metrics
+    assert "entity_overlap" in metrics
+
+
+def test_compute_weighted_kappa_returns_none_for_single_rater():
+    assert compute_weighted_kappa([1, 2, 3], None) is None

@@ -13,11 +13,18 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from novel_continuation.prompting import build_prompt
-from novel_continuation.training import attach_retrieval
+from novel_continuation.training import attach_retrieval, load_trained_model_and_tokenizer, select_context_window
 
 DEFAULT_INPUT_PATH = PROJECT_ROOT / "data" / "processed" / "test.jsonl"
 DEFAULT_HISTORY_PATH = PROJECT_ROOT / "data" / "processed" / "train.jsonl"
 DEFAULT_OUTPUT_PATH = PROJECT_ROOT / "artifacts" / "eval" / "generated_samples.jsonl"
+
+
+def load_training_metadata(model_dir: Path) -> dict:
+    metadata_path = model_dir / "training_config.json"
+    if not metadata_path.exists():
+        return {}
+    return json.loads(metadata_path.read_text(encoding="utf-8"))
 
 def load_jsonl(path: Path) -> list[dict]:
     if not path.exists():
@@ -70,9 +77,8 @@ def generate_rows(
     use_retrieval: bool,
     history_rows: list[dict] | None = None,
     top_k: int = 2,
+    context_format: str | None = None,
 ) -> list[dict]:
-    from transformers import AutoModelForCausalLM, AutoTokenizer
-
     if not model_dir.exists():
         raise FileNotFoundError(
             f"Model directory not found: {model_dir}. Train a model first or point --model-dir to a valid checkpoint."
@@ -82,19 +88,23 @@ def generate_rows(
     if use_retrieval:
         rows = ensure_retrieval_rows(rows, history_rows=history_rows, top_k=top_k)
 
-    model = AutoModelForCausalLM.from_pretrained(model_dir)
-    tokenizer = AutoTokenizer.from_pretrained(model_dir)
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
+    model, tokenizer = load_trained_model_and_tokenizer(model_dir)
+
+    training_metadata = load_training_metadata(model_dir)
+    saved_config = training_metadata.get("config", {})
+    resolved_context_format = context_format or saved_config.get("context_format", "plain")
+    resolved_context_size = int(saved_config.get("context_size", len(rows[0]["context"]) if rows else 1))
 
     generated_rows: list[dict] = []
     for row in rows:
+        context_window = select_context_window(row["context"], resolved_context_size)
         retrieved_items = row.get("retrieved", [])
         retrieved_texts = [item["text"] for item in retrieved_items]
         prompt = build_prompt(
-            context=row["context"],
+            context=context_window,
             retrieved=retrieved_texts,
             include_retrieval=use_retrieval,
+            context_format=resolved_context_format,
         )
         encoded = tokenizer(prompt, return_tensors="pt", truncation=True)
         generated_ids = model.generate(
@@ -133,6 +143,7 @@ def main() -> None:
     parser.add_argument("--max-new-tokens", type=int, default=80)
     parser.add_argument("--top-k", type=int, default=2)
     parser.add_argument("--use-retrieval", action="store_true")
+    parser.add_argument("--context-format", choices=["plain", "structured"], default=None)
     args = parser.parse_args()
 
     rows = load_jsonl(args.input_path)
@@ -144,6 +155,7 @@ def main() -> None:
         use_retrieval=args.use_retrieval,
         history_rows=history_rows,
         top_k=args.top_k,
+        context_format=args.context_format,
     )
     write_jsonl(generated_rows, args.output_path)
 

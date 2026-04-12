@@ -1,269 +1,113 @@
 # Colab Notebook Guide
 
-This guide is the notebook-style version of the Colab instructions.
-Copy each block into a separate Colab cell and run them from top to bottom.
+Copy each block into a separate Colab cell.
 
-Replace `<YOUR_REPO_URL>` with your repository URL before running.
-
-## Cell 1: Optional Drive Mount
-
-Use this cell if you want checkpoints and outputs to persist.
-If you only want a quick temporary run, skip this cell.
+## Cell 1: Clone and install
 
 ```python
-from google.colab import drive
-drive.mount('/content/drive')
-```
-
-## Cell 2: Clone the Repository
-
-If you are using Drive:
-
-```python
-%cd /content/drive/MyDrive
 !git clone <YOUR_REPO_URL>
 %cd st456-project-wt2026-gaogou456
-```
-
-If you are not using Drive:
-
-```python
-%cd /content
-!git clone <YOUR_REPO_URL>
-%cd st456-project-wt2026-gaogou456
-```
-
-If the repo is already cloned:
-
-```python
-!git pull
-```
-
-## Cell 3: Install Dependencies
-
-```python
 !pip install -r requirements.txt
 ```
 
-## Cell 4: Check the Repository Layout
-
-This is optional, but useful for sanity-checking that you are in the right folder.
-
-```python
-!ls
-!ls scripts
-!ls configs
-```
-
-## Cell 5: Download the Sherlock Holmes Texts
+## Cell 2: Download and build the dataset
 
 ```python
 !python scripts/download_gutenberg.py
+!python scripts/build_dataset.py --context-size 4 --min-chars 40
 ```
 
-Expected result:
-
-- raw Gutenberg `.txt` files appear in `data/raw/`
-
-## Cell 6: Build the Processed Dataset
-
-```python
-!python scripts/build_dataset.py
-```
-
-Expected result:
-
-- `data/processed/train.jsonl`
-- `data/processed/val.jsonl`
-- `data/processed/test.jsonl`
-
-Optional custom version:
-
-```python
-!python scripts/build_dataset.py --context-size 3 --min-chars 40
-```
-
-## Cell 7: Inspect Processed Files
+## Cell 3: Inspect processed files
 
 ```python
 !ls data/processed
 !head -n 2 data/processed/train.jsonl
-!head -n 2 data/processed/val.jsonl
-!head -n 2 data/processed/test.jsonl
 ```
 
-## Cell 8: Inspect the Baseline Config
+## Cell 4: Inspect token budgets
 
 ```python
-!cat configs/baseline_distilgpt2.yaml
+!python scripts/inspect_token_stats.py --config configs/e1_distilgpt2_plain_full.yaml
+!python scripts/inspect_token_stats.py --config configs/e3_distilgpt2_structured_long_context.yaml
+!python scripts/inspect_token_stats.py --config configs/e5_distilgpt2_structured_aux_ranking.yaml
 ```
 
-## Cell 9: Train the Baseline Model
+## Cell 5: Main experiment matrix
 
 ```python
-!python scripts/train_baseline.py
+!cat docs/experiments/main-experiment-matrix.md
 ```
 
-Expected result:
-
-- checkpoint files under `artifacts/baseline/`
-
-## Cell 10: Inspect the Retrieval Config
+## Cell 6: Train E1
 
 ```python
-!cat configs/retrieval_distilgpt2.yaml
+!python scripts/train_experiment.py --config configs/e1_distilgpt2_plain_full.yaml
 ```
 
-## Cell 11: Train the Retrieval Model
+## Cell 7: Train E2
 
 ```python
-!python scripts/train_retrieval_model.py
+!python scripts/train_experiment.py --config configs/e2_distilgpt2_structured_full.yaml
 ```
 
-Expected result:
+## Cell 8: Train E3
 
-- checkpoint files under `artifacts/retrieval/`
+```python
+!python scripts/train_experiment.py --config configs/e3_distilgpt2_structured_long_context.yaml
+```
 
-## Cell 12: Generate Baseline Samples
+## Cell 9: Train E4
+
+```python
+!python scripts/train_experiment.py --config configs/e4_distilgpt2_structured_lora.yaml
+```
+
+## Cell 10: Train E5
+
+```python
+!python scripts/train_experiment.py --config configs/e5_distilgpt2_structured_aux_ranking.yaml
+```
+
+## Cell 11: Generate samples for one experiment
 
 ```python
 !python scripts/generate_samples.py \
-  --model-dir artifacts/baseline \
-  --output-path artifacts/eval/generated_samples_baseline.jsonl
+  --model-dir artifacts/e3_long_context \
+  --output-path artifacts/eval/generated_samples_e3.jsonl
 ```
 
-## Cell 13: Generate Retrieval Samples
-
-```python
-!python scripts/generate_samples.py \
-  --model-dir artifacts/retrieval \
-  --use-retrieval \
-  --history-path data/processed/train.jsonl \
-  --output-path artifacts/eval/generated_samples_retrieval.jsonl
-```
-
-This retrieval version uses:
-
-- `train.jsonl` as the history source
-- only prior text for retrieval history
-- no current or future target leakage
-
-## Cell 14: Run Automatic Evaluation for Baseline
+## Cell 12: Run automatic evaluation
 
 ```python
 !python scripts/run_auto_eval.py \
-  --generated-path artifacts/eval/generated_samples_baseline.jsonl \
-  --output-path artifacts/eval/metrics_baseline.csv
+  --model-dir artifacts/e3_long_context \
+  --generated-path artifacts/eval/generated_samples_e3.jsonl \
+  --output-path artifacts/eval/metrics_e3.csv
 ```
 
-## Cell 15: Run Automatic Evaluation for Retrieval
-
-```python
-!python scripts/run_auto_eval.py \
-  --generated-path artifacts/eval/generated_samples_retrieval.jsonl \
-  --output-path artifacts/eval/metrics_retrieval.csv
-```
-
-## Cell 16: Export Human Evaluation CSV for Baseline
+## Cell 13: Export human-eval CSV
 
 ```python
 !python scripts/prepare_human_eval.py \
-  --input-path artifacts/eval/generated_samples_baseline.jsonl \
-  --output-path artifacts/eval/human_eval_baseline.csv \
-  --system-label "System A"
+  --input-path artifacts/eval/generated_samples_e3.jsonl \
+  --output-path artifacts/eval/human_eval_e3.csv \
+  --system-label "System E3"
 ```
 
-## Cell 17: Export Human Evaluation CSV for Retrieval
-
-```python
-!python scripts/prepare_human_eval.py \
-  --input-path artifacts/eval/generated_samples_retrieval.jsonl \
-  --output-path artifacts/eval/human_eval_retrieval.csv \
-  --system-label "System B"
-```
-
-## Cell 18: Inspect Final Outputs
-
-```python
-!ls artifacts
-!ls artifacts/baseline
-!ls artifacts/retrieval
-!ls artifacts/eval
-```
-
-## Cell 19: View the Metric Files
-
-```python
-!cat artifacts/eval/metrics_baseline.csv
-!cat artifacts/eval/metrics_retrieval.csv
-```
-
-## Cell 20: Open the Human Evaluation Rubric
+## Cell 14: Open the rubric
 
 ```python
 !cat docs/human-eval-rubric.md
 ```
 
-## Cell 21: Update the Experiment Log
+## Cell 15: Appendix retrieval experiment
+
+```python
+!python scripts/train_retrieval_model.py --config configs/retrieval_distilgpt2.yaml
+```
+
+## Cell 16: Update the experiment log
 
 ```python
 !cat docs/experiments/experiment-log.md
 ```
-
-After each meaningful run, copy the template in that file and record:
-
-- config path
-- dataset path
-- checkpoint path
-- metrics
-- notes
-
-## Fast Smoke Test Version
-
-If this is your first Colab run, use this smaller sequence first:
-
-```python
-!pip install -r requirements.txt
-!python scripts/download_gutenberg.py
-!python scripts/build_dataset.py
-!head -n 1 data/processed/train.jsonl
-!head -n 1 data/processed/test.jsonl
-!cat configs/baseline_distilgpt2.yaml
-```
-
-Then, if the outputs look correct, continue with training.
-
-## Common Errors
-
-### `ModuleNotFoundError`
-
-Run:
-
-```python
-!pip install -r requirements.txt
-```
-
-### Dataset files missing
-
-Run:
-
-```python
-!python scripts/download_gutenberg.py
-!python scripts/build_dataset.py
-```
-
-### Retrieval generation complains about missing history
-
-Use:
-
-```python
-!python scripts/generate_samples.py \
-  --model-dir artifacts/retrieval \
-  --use-retrieval \
-  --history-path data/processed/train.jsonl \
-  --output-path artifacts/eval/generated_samples_retrieval.jsonl
-```
-
-### Colab session reset and files disappeared
-
-Use the Google Drive version of the setup and keep the repository in Drive.

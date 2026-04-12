@@ -1,4 +1,4 @@
-"""Train the retrieval-augmented paragraph continuation model."""
+"""Train the appendix retrieval experiment for paragraph continuation."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from novel_continuation.training import load_training_config, train_retrieval_mo
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Train the retrieval-augmented continuation model.")
+    parser = argparse.ArgumentParser(description="Train the appendix retrieval continuation model.")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs" / "retrieval_distilgpt2.yaml")
     args = parser.parse_args()
 

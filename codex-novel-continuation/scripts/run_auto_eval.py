@@ -13,6 +13,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from novel_continuation.evaluation import evaluate_generated_rows, write_metrics_csv
+from novel_continuation.training import load_trained_model_and_tokenizer
 
 
 def load_jsonl(path: Path) -> list[dict[str, str]]:
@@ -33,10 +34,12 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Compute automatic metrics for generated continuations.")
     parser.add_argument("--generated-path", type=Path, default=PROJECT_ROOT / "artifacts" / "eval" / "generated_samples.jsonl")
     parser.add_argument("--output-path", type=Path, default=PROJECT_ROOT / "artifacts" / "eval" / "metrics.csv")
+    parser.add_argument("--model-dir", type=Path, required=True)
     args = parser.parse_args()
 
     rows = load_jsonl(args.generated_path)
-    metrics = evaluate_generated_rows(rows)
+    model, tokenizer = load_trained_model_and_tokenizer(args.model_dir)
+    metrics = evaluate_generated_rows(rows, model=model, tokenizer=tokenizer)
     write_metrics_csv(metrics, args.output_path)
 
 

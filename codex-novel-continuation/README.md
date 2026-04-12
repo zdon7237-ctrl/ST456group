@@ -3,15 +3,47 @@
 
 ## Project Overview
 
-This repository contains our ST456 deep learning project on retrieval-augmented English novel continuation. The goal is to generate the next paragraph of a story from the same narrative world and test whether retrieval improves contextual coherence and character consistency.
+This repository studies contextual coherence in Sherlock Holmes paragraph continuation with a Colab-first workflow. The main project narrative now follows the updated proposal:
 
-The implementation is being prepared for Colab-first execution. Data download, preprocessing, training, generation, and evaluation will be handled through code and scripts rather than manual local setup.
+- context design
+- fine-tuning strategy
+- coherence-oriented auxiliary objectives
+
+Retrieval is still available in code, but it is treated as an appendix / optional ablation rather than the main contribution.
+
+## Main Experiment Matrix
+
+| ID | Goal | Core setup |
+|---|---|---|
+| E1 | Baseline | `distilgpt2` + `k=2` + `plain` + `full` + `aux=none` |
+| E2 | Input structure | `distilgpt2` + `k=2` + `structured` + `full` + `aux=none` |
+| E3 | Longer context | `distilgpt2` + `k=4` + `structured` + `full` + `aux=none` |
+| E4 | Fine-tuning strategy | `distilgpt2` + `k=4` + `structured` + `lora` + `aux=none` |
+| E5 | Training objective | `distilgpt2` + `k=4` + `structured` + `full` + `aux=ranking` |
+
+Interpret the results only through these pairwise comparisons:
+
+- E1 vs E2: input structure
+- E2 vs E3: context length
+- E3 vs E4: full fine-tuning vs LoRA
+- E3 vs E5: no auxiliary objective vs coherence-oriented auxiliary objective
+
+## Evaluation
+
+The headline automatic metrics are:
+
+- `perplexity`
+- `bertscore_f1`
+- `rouge_l`
+
+The project also keeps:
+
+- `entity_overlap` as a diagnostic metric
+- human evaluation focused on contextual coherence, character consistency, and fluency
 
 ## Setup
 
 ### Local setup
-
-Create a Python environment and install the dependencies:
 
 ```bash
 pip install -r requirements.txt
@@ -19,23 +51,47 @@ pip install -r requirements.txt
 
 ### Colab setup
 
-In Colab, clone the repository and install the dependencies in a setup cell:
-
-```bash
+```python
 !git clone <your-private-repo-url>
 %cd st456-project-wt2026-gaogou456
 !pip install -r requirements.txt
 ```
 
-All required datasets will be downloaded by project scripts into the working directory. No manual dataset download step will be required.
+## Main Workflow
 
-## Planned Workflow
+1. Download the Sherlock Holmes corpus.
+2. Build paragraph-level continuation datasets.
+3. Inspect token budgets before training.
+4. Run E1-E5 in Colab.
+5. Generate held-out samples.
+6. Run automatic evaluation.
+7. Export human-evaluation sheets.
+8. Optionally run retrieval as an appendix experiment.
 
-1. Download public-domain Sherlock Holmes texts using code.
-2. Clean and split the texts into paragraph-level continuation examples.
-3. Train a plain continuation baseline.
-4. Train a retrieval-augmented continuation model.
-5. Evaluate with automatic metrics and human evaluation materials.
+## Important Scripts
+
+- `scripts/download_gutenberg.py`
+- `scripts/build_dataset.py`
+- `scripts/inspect_token_stats.py`
+- `scripts/train_experiment.py`
+- `scripts/generate_samples.py`
+- `scripts/run_auto_eval.py`
+- `scripts/prepare_human_eval.py`
+
+## Important Configs
+
+- `configs/e1_distilgpt2_plain_full.yaml`
+- `configs/e2_distilgpt2_structured_full.yaml`
+- `configs/e3_distilgpt2_structured_long_context.yaml`
+- `configs/e4_distilgpt2_structured_lora.yaml`
+- `configs/e5_distilgpt2_structured_aux_ranking.yaml`
+- `configs/retrieval_distilgpt2.yaml` for the appendix experiment
+
+## Colab Guides
+
+- `docs/colab-run-guide.md`
+- `docs/colab-notebook-guide.md`
+- `docs/experiments/main-experiment-matrix.md`
 
 ## Course Information
 

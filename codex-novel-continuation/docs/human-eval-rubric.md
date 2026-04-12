@@ -1,35 +1,45 @@
 # Human Evaluation Rubric
 
-Use a 1-5 scale for each generated continuation.
+Use a 1-5 scale for each generated continuation. The main report should emphasize:
+
+- contextual coherence
+- character consistency
+- fluency
+
+`Narrative consistency` may be kept as an additional diagnostic dimension.
+
+## Scoring Anchors
+
+- `1`: clearly poor, with major problems
+- `3`: broadly acceptable, but with noticeable weaknesses
+- `5`: strong performance, with no obvious major issue
 
 ## Contextual Coherence
 
-- `1`: Does not follow naturally from the given context.
-- `2`: Weak connection to the context; several jumps or mismatches.
-- `3`: Mostly follows the context, but with noticeable awkwardness.
-- `4`: Follows the context well with only minor issues.
-- `5`: Continues the context naturally and convincingly.
+- `1`: The continuation does not follow naturally from the given context. Major jumps, contradictions, or broken transitions are visible.
+- `3`: The continuation broadly follows the context, but some links feel awkward, forced, or incomplete.
+- `5`: The continuation follows naturally and advances the scene in a coherent way.
 
 ## Narrative Consistency
 
-- `1`: Clearly contradicts known events or facts from the story.
-- `2`: Contains multiple inconsistencies or unsupported jumps.
-- `3`: Mostly consistent, but with one notable issue.
-- `4`: Consistent with only minor uncertainty.
-- `5`: Fully consistent with prior story events and details.
+- `1`: The continuation contradicts known events, facts, or setting details.
+- `3`: The continuation is mostly consistent, but there is at least one notable mismatch or unsupported leap.
+- `5`: The continuation remains fully consistent with prior events and world details.
 
 ## Character Consistency
 
-- `1`: Characters behave or speak in a way that strongly breaks established characterization.
-- `2`: Several noticeable mismatches in tone, behavior, or viewpoint.
-- `3`: Characterization is mostly plausible, with some drift.
-- `4`: Character behavior and tone are largely consistent.
-- `5`: Character voice, behavior, and references feel highly consistent.
+- `1`: Character behavior, tone, or references clearly break established characterization.
+- `3`: Characterization is mostly plausible, but some drift is noticeable.
+- `5`: Character voice, behavior, and references remain stable and believable.
 
 ## Fluency
 
-- `1`: Hard to read; major grammar or coherence problems.
-- `2`: Frequent awkward phrasing or grammar issues.
-- `3`: Readable but somewhat rough.
-- `4`: Fluent with only small issues.
-- `5`: Clear, natural, and polished.
+- `1`: The paragraph is hard to read because of serious grammar, wording, or coherence issues.
+- `3`: The paragraph is readable, but several phrases are awkward or rough.
+- `5`: The paragraph is clear, natural, and polished.
+
+## Rater Notes
+
+- Aim for two raters when possible.
+- If two raters are available, report weighted Cohen's kappa for each dimension.
+- If only one rater is available, mark inter-rater agreement as `N/A` and state that limitation in the report.

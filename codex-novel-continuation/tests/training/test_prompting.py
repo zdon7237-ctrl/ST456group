@@ -48,3 +48,17 @@ def test_build_prompt_suppresses_empty_retrieval_section():
     assert "[CONTEXT]" in prompt
     assert "[RETRIEVED]" not in prompt
     assert prompt == "[CONTEXT]\np1\np2"
+
+
+def test_build_prompt_supports_structured_context_format():
+    prompt = build_prompt(
+        context=["Holmes lit his pipe.", "Watson watched in silence."],
+        include_retrieval=False,
+        context_format="structured",
+    )
+
+    assert "[CONTEXT]" in prompt
+    assert "[PARAGRAPH 1]" in prompt
+    assert "[PARAGRAPH 2]" in prompt
+    assert "Holmes lit his pipe." in prompt
+    assert "Watson watched in silence." in prompt

@@ -3,9 +3,10 @@ import sys
 import json
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from novel_continuation.dataset_builder import assign_split, build_examples, serialise_examples
-import build_dataset as build_dataset_script
+from scripts import build_dataset as build_dataset_script
 
 
 def test_build_examples_uses_only_previous_paragraphs():

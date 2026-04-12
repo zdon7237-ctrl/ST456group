@@ -1,11 +1,11 @@
 model_name: distilgpt2
 train_path: data/processed/train.jsonl
 eval_path: data/processed/val.jsonl
-output_dir: artifacts/baseline
-context_size: 2
-context_format: plain
+output_dir: artifacts/e5_aux_ranking
+context_size: 4
+context_format: structured
 training_mode: full
-aux_objective: none
+aux_objective: ranking
 aux_weight: 0.1
 max_length: 512
 max_target_tokens: auto

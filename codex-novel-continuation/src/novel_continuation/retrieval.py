@@ -4,8 +4,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from rank_bm25 import BM25Okapi
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+try:
+    from rank_bm25 import BM25Okapi
+except ImportError:  # pragma: no cover - exercised indirectly in tests
+    BM25Okapi = None
 
 
 def fit_tfidf_retriever(candidates: list[str]) -> dict[str, object]:
@@ -82,12 +86,25 @@ class BM25Retriever:
 
     def __post_init__(self) -> None:
         tokenised = [candidate.lower().split() for candidate in self.candidates]
-        self._retriever = BM25Okapi(tokenised)
+        self._tokenised = tokenised
+        self._retriever = BM25Okapi(tokenised) if BM25Okapi is not None else None
+
+    def _fallback_scores(self, query_tokens: list[str]) -> list[float]:
+        query_set = set(query_tokens)
+        scores: list[float] = []
+        for candidate_tokens in self._tokenised:
+            overlap = sum(1 for token in candidate_tokens if token in query_set)
+            scores.append(float(overlap))
+        return scores
 
     def retrieve(self, query: str, top_k: int = 1) -> list[dict[str, object]]:
         if not self.candidates or top_k <= 0:
             return []
-        scores = self._retriever.get_scores(query.lower().split())
+        query_tokens = query.lower().split()
+        if self._retriever is None:
+            scores = self._fallback_scores(query_tokens)
+        else:
+            scores = self._retriever.get_scores(query_tokens)
         ranked_indices = sorted(range(len(scores)), key=lambda idx: scores[idx], reverse=True)[:top_k]
         return [
             {
