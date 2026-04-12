@@ -396,7 +396,12 @@ def test_generate_rows_uses_context_size_from_training_metadata(tmp_path, monkey
 
     observed = {}
 
+    class _FakeConfig:
+        n_positions = 1024
+
     class FakeModel:
+        config = _FakeConfig()
+
         def generate(self, **kwargs):
             return [[1, 2, 3]]
 
@@ -405,7 +410,7 @@ def test_generate_rows_uses_context_size_from_training_metadata(tmp_path, monkey
         eos_token = "<eos>"
         eos_token_id = 0
 
-        def __call__(self, text, return_tensors=None, truncation=False):
+        def __call__(self, text, return_tensors=None, truncation=False, max_length=None):
             observed["prompt"] = text
             return {"input_ids": [[1, 2]], "attention_mask": [[1, 1]]}
 

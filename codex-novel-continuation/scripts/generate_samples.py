@@ -114,7 +114,17 @@ def generate_rows(
             include_retrieval=use_retrieval,
             context_format=resolved_context_format,
         )
-        encoded = tokenizer(prompt, return_tensors="pt", truncation=True)
+        # Truncate input so that input_len + max_new_tokens <= model's max position embeddings
+        max_positions = getattr(model.config, "n_positions", 1024)
+        max_input_len = max_positions - max_new_tokens
+        if max_input_len < 1:
+            max_input_len = 1
+        encoded = tokenizer(
+            prompt,
+            return_tensors="pt",
+            truncation=True,
+            max_length=max_input_len,
+        )
         generated_ids = model.generate(
             **encoded,
             max_new_tokens=max_new_tokens,
