@@ -62,7 +62,14 @@ def compute_entity_overlap(context_text: str, generated_text: str) -> float:
 def compute_bertscore(reference_texts: list[str], generated_texts: list[str]) -> float:
     from bert_score import score
 
-    _, _, f1 = score(generated_texts, reference_texts, lang="en", verbose=False)
+    paired = [
+        (ref, gen) for ref, gen in zip(reference_texts, generated_texts)
+        if ref.strip() and gen.strip()
+    ]
+    if not paired:
+        return 0.0
+    refs, gens = zip(*paired)
+    _, _, f1 = score(list(gens), list(refs), lang="en", verbose=False)
     return float(f1.mean().item())
 
 
