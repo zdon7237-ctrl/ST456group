@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import math
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -273,35 +274,79 @@ def attach_retrieval(
     return enriched
 
 
-def select_negative_candidates(records: list[dict], index: int, num_negative_candidates: int) -> list[str]:
+def build_negative_index(records: list[dict]) -> dict:
+    by_book: dict[str, list[int]] = defaultdict(list)
+    by_split: dict[str, list[int]] = defaultdict(list)
+    for i, r in enumerate(records):
+        book_id = r.get("book_id")
+        if book_id:
+            by_book[book_id].append(i)
+        split = r.get("split")
+        if split:
+            by_split[split].append(i)
+    return {"by_book": by_book, "by_split": by_split}
+
+
+def select_negative_candidates(records: list[dict], index: int, num_negative_candidates: int, neg_index: dict | None = None) -> list[str]:
     if num_negative_candidates <= 0 or not records:
         return []
 
     current = records[index]
+    current_book = current.get("book_id")
+    current_split = current.get("split")
+    current_para = current.get("paragraph_index")
+    current_target = current.get("target")
+
     preferred: list[str] = []
     fallback: list[str] = []
-    for candidate_index, record in enumerate(records):
-        if candidate_index == index or record.get("target") == current.get("target"):
-            continue
+    needed = num_negative_candidates
 
-        same_book = current.get("book_id") and record.get("book_id") == current.get("book_id")
-        non_adjacent = (
-            current.get("paragraph_index") is not None
-            and record.get("paragraph_index") is not None
-            and abs(int(record["paragraph_index"]) - int(current["paragraph_index"])) > 1
-        )
-        if same_book:
-            if non_adjacent:
+    if neg_index is not None:
+        same_book_indices = neg_index["by_book"].get(current_book, []) if current_book else []
+        for ci in same_book_indices:
+            if ci == index:
+                continue
+            record = records[ci]
+            if record.get("target") == current_target:
+                continue
+            if current_para is not None and record.get("paragraph_index") is not None and abs(int(record["paragraph_index"]) - int(current_para)) > 1:
                 preferred.append(record["target"])
-            continue
+                if len(preferred) >= needed:
+                    break
 
-        if current.get("split") is None or record.get("split") == current.get("split"):
-            fallback.append(record["target"])
+        if len(preferred) < needed:
+            fallback_indices = neg_index["by_split"].get(current_split, []) if current_split else list(range(len(records)))
+            for ci in fallback_indices:
+                if ci == index:
+                    continue
+                record = records[ci]
+                if record.get("target") == current_target:
+                    continue
+                if record.get("book_id") == current_book and current_book:
+                    continue
+                fallback.append(record["target"])
+                if len(preferred) + len(fallback) >= needed:
+                    break
+    else:
+        for candidate_index, record in enumerate(records):
+            if candidate_index == index or record.get("target") == current_target:
+                continue
+            same_book = current_book and record.get("book_id") == current_book
+            non_adjacent = (
+                current_para is not None
+                and record.get("paragraph_index") is not None
+                and abs(int(record["paragraph_index"]) - int(current_para)) > 1
+            )
+            if same_book:
+                if non_adjacent:
+                    preferred.append(record["target"])
+                continue
+            if current_split is None or record.get("split") == current_split:
+                fallback.append(record["target"])
+            if len(preferred) + len(fallback) >= needed:
+                break
 
-    ordered: list[str] = []
-    for candidate in preferred + fallback:
-        if candidate not in ordered:
-            ordered.append(candidate)
+    ordered = preferred + fallback
     if not ordered:
         return []
 
@@ -334,6 +379,8 @@ def prepare_training_records(
             history_prefix=history_prefix,
         )
 
+    neg_index = build_negative_index(records) if aux_objective != "none" else None
+
     prepared = []
     for index, record in enumerate(records):
         context_window = select_context_window(record["context"], context_size)
@@ -358,7 +405,7 @@ def prepare_training_records(
                 prepared_record[key] = record[key]
 
         if aux_objective != "none":
-            negatives = select_negative_candidates(records, index=index, num_negative_candidates=num_negative_candidates)
+            negatives = select_negative_candidates(records, index=index, num_negative_candidates=num_negative_candidates, neg_index=neg_index)
             if negatives:
                 prepared_record["candidate_targets"] = [record["target"], *negatives]
                 prepared_record["candidate_labels"] = [1, *([0] * len(negatives))]

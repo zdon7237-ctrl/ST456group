@@ -91,7 +91,11 @@ def generate_rows(
     if use_retrieval:
         rows = ensure_retrieval_rows(rows, history_rows=history_rows, top_k=top_k)
 
+    import torch
+
     model, tokenizer = load_trained_model_and_tokenizer(model_dir)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device).eval()
 
     training_metadata = load_training_metadata(model_dir)
     saved_config = training_metadata.get("config", {})
@@ -114,17 +118,18 @@ def generate_rows(
             include_retrieval=use_retrieval,
             context_format=resolved_context_format,
         )
-        # Truncate input so that input_len + max_new_tokens <= model's max position embeddings
+        inference_prompt = f"{prompt}\n\n[TARGET]\n"
         max_positions = getattr(model.config, "n_positions", 1024)
         max_input_len = max_positions - max_new_tokens
         if max_input_len < 1:
             max_input_len = 1
         encoded = tokenizer(
-            prompt,
+            inference_prompt,
             return_tensors="pt",
             truncation=True,
             max_length=max_input_len,
         )
+        encoded = {k: v.to(device) for k, v in encoded.items()}
         generated_ids = model.generate(
             **encoded,
             max_new_tokens=max_new_tokens,
@@ -134,7 +139,8 @@ def generate_rows(
             pad_token_id=tokenizer.eos_token_id,
         )
         full_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-        generated_text = full_text[len(prompt) :].strip() if full_text.startswith(prompt) else full_text.strip()
+        generated_text = full_text[len(inference_prompt):].strip() if full_text.startswith(inference_prompt) else full_text.strip()
+        generated_text = generated_text.replace("[TARGET]", "").strip()
         generated_rows.append(
             {
                 "sample_id": row.get("paragraph_index"),

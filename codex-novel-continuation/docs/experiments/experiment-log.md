@@ -2,6 +2,16 @@
 
 Use this template to record each meaningful run.
 
+## Quick Validation Mode
+
+Notebook 支持 `QUICK_VALIDATION = True` 快速验证模式：
+
+- 训练：所有实验 epochs 降为 1
+- 评估：仅使用前 20 条测试样本
+- 用途：验证全流程是否跑通，不用于最终结果
+
+正式实验请确保 `QUICK_VALIDATION = False`。
+
 ## Entry Template
 
 - Date:

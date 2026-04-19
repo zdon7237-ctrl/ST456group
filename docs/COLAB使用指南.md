@@ -104,6 +104,7 @@
 
 1. 先看第一格参数区
 2. 按需要修改：
+   - `QUICK_VALIDATION`（快速验证模式，默认开启）
    - `USE_GOOGLE_DRIVE`
    - `RUN_FULL_MAINLINE`
    - `RUN_APPENDIX_RETRIEVAL`
@@ -151,28 +152,39 @@ notebook 会自动：
 
 ## 6. 参数建议
 
-### 第一次最稳妥的设置
+### 快速验证模式（推荐第一次使用）
 
 第一次建议这样设置：
 
-- `RUN_FULL_MAINLINE = False`
+- `QUICK_VALIDATION = True`
+- `RUN_FULL_MAINLINE = True`
 - `RUN_APPENDIX_RETRIEVAL = False`
 - `DOWNLOAD_RESULTS_ZIP = True`
 
-这样 notebook 会先跑：
+快速验证模式会：
 
-- 数据准备
-- token stats
-- E1 smoke
-- E1 样本生成
-- E1 自动评估
-- E1 人评导出
+- 把所有实验的训练轮数从 3 降到 1
+- 只用前 20 条测试样本做生成和评估
 
-确认流程完全打通之后，再把：
+这样可以在几分钟内跑通 E1-E5 全流程，确认代码和环境没有问题。
 
+### 正式实验设置
+
+确认快速验证通过后，改为：
+
+- `QUICK_VALIDATION = False`
 - `RUN_FULL_MAINLINE = True`
 
-继续跑 E2-E5。
+这样会用完整的 3 epochs 训练和全量测试集评估。
+
+### 保守的分步设置
+
+如果不确定环境是否正常，可以先：
+
+- `QUICK_VALIDATION = True`
+- `RUN_FULL_MAINLINE = False`
+
+这样只跑 E1 一个实验的快速验证，确认没问题后再逐步打开。
 
 ### 是否挂载 Google Drive
 

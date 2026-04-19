@@ -78,8 +78,10 @@ def compute_perplexity(model, tokenizer, texts: list[str]) -> float:
         text_iter = tqdm(texts, desc="计算 perplexity", unit="条")
     except ImportError:
         text_iter = texts
+    device = next(model.parameters()).device
     for text in text_iter:
         encoded = tokenizer(text, return_tensors="pt", truncation=True)
+        encoded = {k: v.to(device) for k, v in encoded.items()}
         with torch.no_grad():
             outputs = model(**encoded, labels=encoded["input_ids"])
         losses.append(float(outputs.loss.item()))

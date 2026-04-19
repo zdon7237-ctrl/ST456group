@@ -1,0 +1,17 @@
+{
+  "config_path": "configs/e3_distilgpt2_structured_long_context.yaml",
+  "model_name": "distilgpt2",
+  "context_format": "structured",
+  "max_length": 512,
+  "recommended_max_target_tokens": 176,
+  "train": {
+    "avg_total_tokens": 412.1774834437086,
+    "max_total_tokens": 1568.0,
+    "truncation_rate": 0.23954588457899717
+  },
+  "eval": {
+    "avg_total_tokens": 372.26060606060605,
+    "max_total_tokens": 1291.0,
+    "truncation_rate": 0.1696969696969697
+  }
+}
