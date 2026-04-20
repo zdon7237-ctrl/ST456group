@@ -53,19 +53,18 @@ Status: done
 - [x] Position retrieval as an optional appendix experiment
 
 ### Phase 3: Core experiment support
-Status: in progress
+Status: done
 
 - [x] Keep the full fine-tuning baseline path working
-- [ ] Add a `gpt2` comparison path if compute budget allows
 - [x] Add LoRA training support
 - [x] Add configurable context-window / structured-context comparisons
 
 ### Phase 4: Coherence-objective support
-Status: in progress
+Status: done
 
 - [x] Choose a lightweight auxiliary coherence objective
 - [x] Add config support for auxiliary loss weight
-- [ ] Run a smoke test for the auxiliary objective path
+- [x] Smoke test passed in Colab（E5 快速验证通过）
 
 ### Phase 5: Evaluation alignment
 Status: done
@@ -76,12 +75,15 @@ Status: done
 - [x] Keep human evaluation export and rubric usable in Colab
 
 ### Phase 6: Final experiment execution and reporting
-Status: pending
+Status: in progress
 
-- [ ] Run the final Colab experiment set
-- [ ] Fill the experiment log with real runs
-- [ ] Summarize key findings and failure cases
-- [ ] Prepare report tables, figures, and contribution notes
+- [x] E1-E5 快速验证跑通（20 条样本）
+- [x] 修复代码 bug（generate_samples.py, retrieval.py）
+- [ ] 跑正式实验（完整测试集 + 3 epochs）
+- [ ] 下载正式结果并替换本地数据
+- [ ] 组员完成人工评估打分
+- [ ] 制作报告图表（指标柱状图、样本对比）
+- [ ] 撰写最终报告（NeurIPS 风格，≤12 页）
 
 ---
 

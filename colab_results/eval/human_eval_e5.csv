@@ -1,6 +1,17 @@
 sample_id,system_label,prompt,gold_target,generated_text,contextual_coherence,narrative_consistency,character_consistency,fluency
-1727,E1,"[CONTEXT]
+1727,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“You are sure of it! Then let us hurry to him at once to let him know
+that the truth is known.”
+[PARAGRAPH 2]
+“He knows it already. When I had cleared it all up I had an interview
+with him, and finding that he would not tell me the story, I told it to
+him, on which he had to confess that I was right and to add the very
+few details which were not yet quite clear to me. Your news of this
+morning, however, may open his lips.”
+[PARAGRAPH 3]
 “For Heaven’s sake, tell me, then, what is this extraordinary mystery!”
+[PARAGRAPH 4]
 “I will do so, and I will show you the steps by which I reached it. And
 let me say to you, first, that which it is hardest for me to say and
 for you to hear: there has been an understanding between Sir George
@@ -12,18 +23,28 @@ conscience. Your niece knew nothing of such men. When he breathed his
 vows to her, as he had done to a hundred before her, she flattered
 herself that she alone had touched his heart. The devil knows best what
 he said, but at least she became his tool and was in the habit of
-seeing him nearly every evening.”","“I am afraid of you, Mr. Holmes,” said Holmes. “They are living in a house together.
-There are two things which you have said to me. One is that they have
-married at the moment. I shall have the best of my power as to
-why I left them.”
+seeing him nearly every evening.”","“They came out of hiding to make it over and over again. That they came out of hiding
+to make it over and over again. You are right in saying that I am the
+father, for you and I are both brothers.”
 
 
-“It is the most",,,,
-1728,E1,"[CONTEXT]
+“I am here, and I am sure that Sir Henry is the father of the
+daughter, and",,,,
+1728,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“He knows it already. When I had cleared it all up I had an interview
+with him, and finding that he would not tell me the story, I told it to
+him, on which he had to confess that I was right and to add the very
+few details which were not yet quite clear to me. Your news of this
+morning, however, may open his lips.”
+[PARAGRAPH 2]
+“For Heaven’s sake, tell me, then, what is this extraordinary mystery!”
+[PARAGRAPH 3]
 “I will do so, and I will show you the steps by which I reached it. And
 let me say to you, first, that which it is hardest for me to say and
 for you to hear: there has been an understanding between Sir George
 Burnwell and your niece Mary. They have now fled together.”
+[PARAGRAPH 4]
 “It is unfortunately more than possible; it is certain. Neither you nor
 your son knew the true character of this man when you admitted him into
 your family circle. He is one of the most dangerous men in England—a
@@ -33,17 +54,19 @@ vows to her, as he had done to a hundred before her, she flattered
 herself that she alone had touched his heart. The devil knows best what
 he said, but at least she became his tool and was in the habit of
 seeing him nearly every evening.”","“I cannot, and I will not, believe it!” cried the banker with an ashen
-face.","“I could not be more excited than that.” He cried. “I
-could not think of anything more.”
-
-
-“There are other reasons why I could not have cared for him.”
-
-
-“It is a very strange thing to live in that country,” said I.
-
-[T",,,,
-1729,E1,"[CONTEXT]
+face.","“He was the first man to tell me the true truth of his story, and I
+would not hesitate to confess it. He was a madman, and he had no one
+to do for him. He was the devil’s friend, and he was in the habit of
+doing nothing for her. You know how he was, and you know how he kept from",,,,
+1729,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“For Heaven’s sake, tell me, then, what is this extraordinary mystery!”
+[PARAGRAPH 2]
+“I will do so, and I will show you the steps by which I reached it. And
+let me say to you, first, that which it is hardest for me to say and
+for you to hear: there has been an understanding between Sir George
+Burnwell and your niece Mary. They have now fled together.”
+[PARAGRAPH 3]
 “It is unfortunately more than possible; it is certain. Neither you nor
 your son knew the true character of this man when you admitted him into
 your family circle. He is one of the most dangerous men in England—a
@@ -53,6 +76,7 @@ vows to her, as he had done to a hundred before her, she flattered
 herself that she alone had touched his heart. The devil knows best what
 he said, but at least she became his tool and was in the habit of
 seeing him nearly every evening.”
+[PARAGRAPH 4]
 “I cannot, and I will not, believe it!” cried the banker with an ashen
 face.","“I will tell you, then, what occurred in your house last night. Your
 niece, when you had, as she thought, gone to your room, slipped down
@@ -65,16 +89,34 @@ extinguishes all other loves, and I think that she must have been one.
 She had hardly listened to his instructions when she saw you coming
 downstairs, on which she closed the window rapidly and told you about
 one of the servants’ escapade with her wooden-legged lover, which was
-all perfectly true.","“Not a word of it, but it is true, Mr. Holmes, and you are all aware that
-this is a lie. You are, of course, your own
-friend.”
+all perfectly true.","“You are a fool, sir. You have deceived me!” cried the old friend.
+[PARAGRAPH 5]
+“It is absurd, sir, that you have been lying all your life,
+and that you were lying. Well, Mr. Holmes, what is your
+right motive for lying?”
 
 
-“It is true that you have told me how to make a fool of yourself, and that
-you have told me how to make a fool of yourself",,,,
-1730,E1,"[CONTEXT]
+“I",,,,
+1730,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“I will do so, and I will show you the steps by which I reached it. And
+let me say to you, first, that which it is hardest for me to say and
+for you to hear: there has been an understanding between Sir George
+Burnwell and your niece Mary. They have now fled together.”
+[PARAGRAPH 2]
+“It is unfortunately more than possible; it is certain. Neither you nor
+your son knew the true character of this man when you admitted him into
+your family circle. He is one of the most dangerous men in England—a
+ruined gambler, an absolutely desperate villain, a man without heart or
+conscience. Your niece knew nothing of such men. When he breathed his
+vows to her, as he had done to a hundred before her, she flattered
+herself that she alone had touched his heart. The devil knows best what
+he said, but at least she became his tool and was in the habit of
+seeing him nearly every evening.”
+[PARAGRAPH 3]
 “I cannot, and I will not, believe it!” cried the banker with an ashen
 face.
+[PARAGRAPH 4]
 “I will tell you, then, what occurred in your house last night. Your
 niece, when you had, as she thought, gone to your room, slipped down
 and talked to her lover through the window which leads into the stable
@@ -100,14 +142,28 @@ with horror, ran along and slipped behind the curtain near your door,
 whence he could see what passed in the hall beneath. He saw her
 stealthily open the window, hand out the coronet to someone in the
 gloom, and then closing it once more hurry back to her room, passing
-quite close to where he stood hid behind the curtain.","“I will tell you what you want to know,” said Holmes. “Nothing fancy is
-wrong.”
+quite close to where he stood hid behind the curtain.","“You must be ashamed of it,” said she. “You will not be ashamed of your
+association with him unless you will not leave him. You shall not let me see
+it in your own hands until I am there, and I will be a servant of my
+father.”
 
 
-“He said no, but I had no intention of taking it down, so I
-foolily put it to you. He was a very good-looking man, and he
-put his head on his shoulders, with",,,,
-1731,E1,"[CONTEXT]
+“My sister is a very strong woman",,,,
+1731,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“It is unfortunately more than possible; it is certain. Neither you nor
+your son knew the true character of this man when you admitted him into
+your family circle. He is one of the most dangerous men in England—a
+ruined gambler, an absolutely desperate villain, a man without heart or
+conscience. Your niece knew nothing of such men. When he breathed his
+vows to her, as he had done to a hundred before her, she flattered
+herself that she alone had touched his heart. The devil knows best what
+he said, but at least she became his tool and was in the habit of
+seeing him nearly every evening.”
+[PARAGRAPH 2]
+“I cannot, and I will not, believe it!” cried the banker with an ashen
+face.
+[PARAGRAPH 3]
 “I will tell you, then, what occurred in your house last night. Your
 niece, when you had, as she thought, gone to your room, slipped down
 and talked to her lover through the window which leads into the stable
@@ -120,6 +176,7 @@ She had hardly listened to his instructions when she saw you coming
 downstairs, on which she closed the window rapidly and told you about
 one of the servants’ escapade with her wooden-legged lover, which was
 all perfectly true.
+[PARAGRAPH 4]
 “Your boy, Arthur, went to bed after his interview with you but he
 slept badly on account of his uneasiness about his club debts. In the
 middle of the night he heard a soft tread pass his door, so he rose
@@ -147,15 +204,29 @@ your son struck Sir George and cut him over the eye. Then something
 suddenly snapped, and your son, finding that he had the coronet in his
 hands, rushed back, closed the window, ascended to your room, and had
 just observed that the coronet had been twisted in the struggle and was
-endeavouring to straighten it when you appeared upon the scene.”","“Thank you very much,” said she, smiling, “for your assistance, and for your help,
-as you have done all right.”
-
-
-“I am glad that you have taken my advice.”
-
-
-“It is very likely that I will not have the time to think of it again,",,,,
-1732,E1,"[CONTEXT]
+endeavouring to straighten it when you appeared upon the scene.”","“He stood in the way of the carriage, and I could see from him that he had been
+a very clever man,” said she. “He was the son of a great
+daughter, and he was the only one of us who was not a
+child to you. He is a very cunning man, and he has
+not a very good word for it.",,,,
+1732,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“I cannot, and I will not, believe it!” cried the banker with an ashen
+face.
+[PARAGRAPH 2]
+“I will tell you, then, what occurred in your house last night. Your
+niece, when you had, as she thought, gone to your room, slipped down
+and talked to her lover through the window which leads into the stable
+lane. His footmarks had pressed right through the snow, so long had he
+stood there. She told him of the coronet. His wicked lust for gold
+kindled at the news, and he bent her to his will. I have no doubt that
+she loved you, but there are women in whom the love of a lover
+extinguishes all other loves, and I think that she must have been one.
+She had hardly listened to his instructions when she saw you coming
+downstairs, on which she closed the window rapidly and told you about
+one of the servants’ escapade with her wooden-legged lover, which was
+all perfectly true.
+[PARAGRAPH 3]
 “Your boy, Arthur, went to bed after his interview with you but he
 slept badly on account of his uneasiness about his club debts. In the
 middle of the night he heard a soft tread pass his door, so he rose
@@ -171,6 +242,7 @@ whence he could see what passed in the hall beneath. He saw her
 stealthily open the window, hand out the coronet to someone in the
 gloom, and then closing it once more hurry back to her room, passing
 quite close to where he stood hid behind the curtain.
+[PARAGRAPH 4]
 “As long as she was on the scene he could not take any action without a
 horrible exposure of the woman whom he loved. But the instant that she
 was gone he realised how crushing a misfortune this would be for you,
@@ -188,14 +260,42 @@ endeavouring to straighten it when you appeared upon the scene.”","“You then
 felt that he had deserved your warmest thanks. He could not explain the
 true state of affairs without betraying one who certainly deserved
 little enough consideration at his hands. He took the more chivalrous
-view, however, and preserved her secret.”","“I am sure I am not convinced, Sir Charles, that you had indeed done anything
-wrong with the coronet. It is absurd,” said Holmes,
-and he, rising and stepping out of his chair, his eyes were drawn towards the
-darkness, and the cry of his hands came as he approached.
-
-
-“It is absurd.",,,,
-1733,E1,"[CONTEXT]
+view, however, and preserved her secret.”","“I should have seen it, Watson,” said Holmes. “The only way I could know,
+was that my father had come to you with an absolute
+disbelief that he had come in to help you. I was too
+l in the mood of a crisis, and I had no way to
+make a case that he had come here to help me.",,,,
+1733,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“I will tell you, then, what occurred in your house last night. Your
+niece, when you had, as she thought, gone to your room, slipped down
+and talked to her lover through the window which leads into the stable
+lane. His footmarks had pressed right through the snow, so long had he
+stood there. She told him of the coronet. His wicked lust for gold
+kindled at the news, and he bent her to his will. I have no doubt that
+she loved you, but there are women in whom the love of a lover
+extinguishes all other loves, and I think that she must have been one.
+She had hardly listened to his instructions when she saw you coming
+downstairs, on which she closed the window rapidly and told you about
+one of the servants’ escapade with her wooden-legged lover, which was
+all perfectly true.
+[PARAGRAPH 2]
+“Your boy, Arthur, went to bed after his interview with you but he
+slept badly on account of his uneasiness about his club debts. In the
+middle of the night he heard a soft tread pass his door, so he rose
+and, looking out, was surprised to see his cousin walking very
+stealthily along the passage until she disappeared into your
+dressing-room. Petrified with astonishment, the lad slipped on some
+clothes and waited there in the dark to see what would come of this
+strange affair. Presently she emerged from the room again, and in the
+light of the passage-lamp your son saw that she carried the precious
+coronet in her hands. She passed down the stairs, and he, thrilling
+with horror, ran along and slipped behind the curtain near your door,
+whence he could see what passed in the hall beneath. He saw her
+stealthily open the window, hand out the coronet to someone in the
+gloom, and then closing it once more hurry back to her room, passing
+quite close to where he stood hid behind the curtain.
+[PARAGRAPH 3]
 “As long as she was on the scene he could not take any action without a
 horrible exposure of the woman whom he loved. But the instant that she
 was gone he realised how crushing a misfortune this would be for you,
@@ -210,6 +310,7 @@ suddenly snapped, and your son, finding that he had the coronet in his
 hands, rushed back, closed the window, ascended to your room, and had
 just observed that the coronet had been twisted in the struggle and was
 endeavouring to straighten it when you appeared upon the scene.”
+[PARAGRAPH 4]
 “You then roused his anger by calling him names at a moment when he
 felt that he had deserved your warmest thanks. He could not explain the
 true state of affairs without betraying one who certainly deserved
@@ -218,18 +319,54 @@ view, however, and preserved her secret.”","“And that was why she shrieked a
 cried Mr. Holder. “Oh, my God! what a blind fool I have been! And his
 asking to be allowed to go out for five minutes! The dear fellow wanted
 to see if the missing piece were at the scene of the struggle. How
-cruelly I have misjudged him!”","“I was a very nervous fellow, and I could not get off the sofa. I had been
-very nervous for two or three minutes, and when I had heard of the
-cannibal, I thought that the matter was about to become too
-broad. It was a matter of my own choosing. The coroner had
-asked the jury for advice on the matter in
-the",,,,
-1734,E1,"[CONTEXT]
+cruelly I have misjudged him!”","“When you heard her cry, you saw her cry.”
+
+
+“This cry was not very clear,” said Holmes, laughing, “and I
+remain unable to explain it at the time. ‘Why, then, is the man so
+hardly a man to speak of?’
+
+
+�",,,,
+1734,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“Your boy, Arthur, went to bed after his interview with you but he
+slept badly on account of his uneasiness about his club debts. In the
+middle of the night he heard a soft tread pass his door, so he rose
+and, looking out, was surprised to see his cousin walking very
+stealthily along the passage until she disappeared into your
+dressing-room. Petrified with astonishment, the lad slipped on some
+clothes and waited there in the dark to see what would come of this
+strange affair. Presently she emerged from the room again, and in the
+light of the passage-lamp your son saw that she carried the precious
+coronet in her hands. She passed down the stairs, and he, thrilling
+with horror, ran along and slipped behind the curtain near your door,
+whence he could see what passed in the hall beneath. He saw her
+stealthily open the window, hand out the coronet to someone in the
+gloom, and then closing it once more hurry back to her room, passing
+quite close to where he stood hid behind the curtain.
+[PARAGRAPH 2]
+“As long as she was on the scene he could not take any action without a
+horrible exposure of the woman whom he loved. But the instant that she
+was gone he realised how crushing a misfortune this would be for you,
+and how all-important it was to set it right. He rushed down, just as
+he was, in his bare feet, opened the window, sprang out into the snow,
+and ran down the lane, where he could see a dark figure in the
+moonlight. Sir George Burnwell tried to get away, but Arthur caught
+him, and there was a struggle between them, your lad tugging at one
+side of the coronet, and his opponent at the other. In the scuffle,
+your son struck Sir George and cut him over the eye. Then something
+suddenly snapped, and your son, finding that he had the coronet in his
+hands, rushed back, closed the window, ascended to your room, and had
+just observed that the coronet had been twisted in the struggle and was
+endeavouring to straighten it when you appeared upon the scene.”
+[PARAGRAPH 3]
 “You then roused his anger by calling him names at a moment when he
 felt that he had deserved your warmest thanks. He could not explain the
 true state of affairs without betraying one who certainly deserved
 little enough consideration at his hands. He took the more chivalrous
 view, however, and preserved her secret.”
+[PARAGRAPH 4]
 “And that was why she shrieked and fainted when she saw the coronet,”
 cried Mr. Holder. “Oh, my God! what a blind fool I have been! And his
 asking to be allowed to go out for five minutes! The dear fellow wanted
@@ -250,17 +387,43 @@ whom you had already spoken to me, and inquiry showed it was so. I
 passed round the garden without seeing anything more than random
 tracks, which I took to be the police; but when I got into the stable
 lane a very long and complex story was written in the snow in front of
-me.","“The devil, Mr. Holmes, is not a man of reason,” cried his companion, who
-was in his chair with his hands in his hands. “The devil is always
-doubtful. The devil is very well aware of his power,
-and his power must be respected in a good way. You have
-nothing to do with it,” he",,,,
-1735,E1,"[CONTEXT]
+me.","“Your Majesty has done his utmost to save the poor fellow,” said he. “I can tell you
+that he is in no position to interfere.”
+
+
+“The gentleman’s explanation is quite as follows:”
+
+
+“I am convinced that the matter is entirely out of his control,�",,,,
+1735,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“As long as she was on the scene he could not take any action without a
+horrible exposure of the woman whom he loved. But the instant that she
+was gone he realised how crushing a misfortune this would be for you,
+and how all-important it was to set it right. He rushed down, just as
+he was, in his bare feet, opened the window, sprang out into the snow,
+and ran down the lane, where he could see a dark figure in the
+moonlight. Sir George Burnwell tried to get away, but Arthur caught
+him, and there was a struggle between them, your lad tugging at one
+side of the coronet, and his opponent at the other. In the scuffle,
+your son struck Sir George and cut him over the eye. Then something
+suddenly snapped, and your son, finding that he had the coronet in his
+hands, rushed back, closed the window, ascended to your room, and had
+just observed that the coronet had been twisted in the struggle and was
+endeavouring to straighten it when you appeared upon the scene.”
+[PARAGRAPH 2]
+“You then roused his anger by calling him names at a moment when he
+felt that he had deserved your warmest thanks. He could not explain the
+true state of affairs without betraying one who certainly deserved
+little enough consideration at his hands. He took the more chivalrous
+view, however, and preserved her secret.”
+[PARAGRAPH 3]
 “And that was why she shrieked and fainted when she saw the coronet,”
 cried Mr. Holder. “Oh, my God! what a blind fool I have been! And his
 asking to be allowed to go out for five minutes! The dear fellow wanted
 to see if the missing piece were at the scene of the struggle. How
 cruelly I have misjudged him!”
+[PARAGRAPH 4]
 “When I arrived at the house,” continued Holmes, “I at once went very
 carefully round it to observe if there were any traces in the snow
 which might help me. I knew that none had fallen since the evening
@@ -291,12 +454,25 @@ where a few drops of blood had fallen, to show me that I was not
 mistaken. Boots had then run down the lane, and another little smudge
 of blood showed that it was he who had been hurt. When he came to the
 high road at the other end, I found that the pavement had been cleared,
-so there was an end to that clue.","“I’ve just left you to think.” He opened it, and there
-was a crackling sound in the air. “I hear nothing of it. There is a few
-steps to which I was able to see the person. I could see the
-hand-marks of the woman’s hand, and there was a crackle in her
-face",,,,
-1736,E1,"[CONTEXT]
+so there was an end to that clue.","“‘Why should he tell us,’ said Holmes. ‘Because he is afraid that I shall throw a stone upon the
+table, and that we shall get the word out to you, and I shall come
+to you with a very clear message.’
+[PARAGRAPH 5]
+“‘Why should he tell us?’ said",,,,
+1736,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“You then roused his anger by calling him names at a moment when he
+felt that he had deserved your warmest thanks. He could not explain the
+true state of affairs without betraying one who certainly deserved
+little enough consideration at his hands. He took the more chivalrous
+view, however, and preserved her secret.”
+[PARAGRAPH 2]
+“And that was why she shrieked and fainted when she saw the coronet,”
+cried Mr. Holder. “Oh, my God! what a blind fool I have been! And his
+asking to be allowed to go out for five minutes! The dear fellow wanted
+to see if the missing piece were at the scene of the struggle. How
+cruelly I have misjudged him!”
+[PARAGRAPH 3]
 “When I arrived at the house,” continued Holmes, “I at once went very
 carefully round it to observe if there were any traces in the snow
 which might help me. I knew that none had fallen since the evening
@@ -314,6 +490,7 @@ passed round the garden without seeing anything more than random
 tracks, which I took to be the police; but when I got into the stable
 lane a very long and complex story was written in the snow in front of
 me.
+[PARAGRAPH 4]
 “There was a double line of tracks of a booted man, and a second double
 line which I saw with delight belonged to a man with naked feet. I was
 at once convinced from what you had told me that the latter was your
@@ -339,16 +516,37 @@ with him; they had each tugged at the coronet, their united strength
 causing injuries which neither alone could have effected. He had
 returned with the prize, but had left a fragment in the grasp of his
 opponent. So far I was clear. The question now was, who was the man, and
-who was it brought him the coronet?","“There is no sign of him.” I asked, “you see that he has not been in the
-street for four years.”
-
-
-“Well, I understand that he does not walk in the street, and that he is not
-known to be seen at all.”
-
-
-“He has not",,,,
-1737,E1,"[CONTEXT]
+who was it brought him the coronet?","“There was a hole in the middle, but that is where I saw that Boots had left out the
+corner window. That is where I saw that there was a dead man lying on the
+corner, and that he was lying with the
+cloak on his back. I followed him to the door and saw that the
+cloak was about to fall, and I saw",,,,
+1737,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“And that was why she shrieked and fainted when she saw the coronet,”
+cried Mr. Holder. “Oh, my God! what a blind fool I have been! And his
+asking to be allowed to go out for five minutes! The dear fellow wanted
+to see if the missing piece were at the scene of the struggle. How
+cruelly I have misjudged him!”
+[PARAGRAPH 2]
+“When I arrived at the house,” continued Holmes, “I at once went very
+carefully round it to observe if there were any traces in the snow
+which might help me. I knew that none had fallen since the evening
+before, and also that there had been a strong frost to preserve
+impressions. I passed along the tradesmen’s path, but found it all
+trampled down and indistinguishable. Just beyond it, however, at the
+far side of the kitchen door, a woman had stood and talked with a man,
+whose round impressions on one side showed that he had a wooden leg. I
+could even tell that they had been disturbed, for the woman had run
+back swiftly to the door, as was shown by the deep toe and light heel
+marks, while Wooden-leg had waited a little, and then had gone away. I
+thought at the time that this might be the maid and her sweetheart, of
+whom you had already spoken to me, and inquiry showed it was so. I
+passed round the garden without seeing anything more than random
+tracks, which I took to be the police; but when I got into the stable
+lane a very long and complex story was written in the snow in front of
+me.
+[PARAGRAPH 3]
 “There was a double line of tracks of a booted man, and a second double
 line which I saw with delight belonged to a man with naked feet. I was
 at once convinced from what you had told me that the latter was your
@@ -364,6 +562,7 @@ mistaken. Boots had then run down the lane, and another little smudge
 of blood showed that it was he who had been hurt. When he came to the
 high road at the other end, I found that the pavement had been cleared,
 so there was an end to that clue.
+[PARAGRAPH 4]
 “On entering the house, however, I examined, as you remember, the sill
 and framework of the hall window with my lens, and I could at once see
 that someone had passed out. I could distinguish the outline of an
@@ -384,11 +583,49 @@ reason. As he loved his cousin, however, there was an excellent
 explanation why he should retain her secret—the more so as the secret
 was a disgraceful one. When I remembered that you had seen her at that
 window, and how she had fainted on seeing the coronet again, my
-conjecture became a certainty.","“‘The man was a black man, a man who was standing in the mud, and was standing in
-the mud. He had done nothing but throw his foot away from the mud and
-fall in the direction of the ground. He had done nothing but throw his foot away from the mud,
-but he was standing in the mud, and his foot was in the mud,",,,,
-1738,E1,"[CONTEXT]
+conjecture became a certainty.","“I shall tell you, Watson,” said he. “And I am certain that the key to the
+course of the road lies at the far end, and that he is the
+father of the thief.”
+
+
+“We shall find out all the details of which we have
+to-night to answer, and I shall see what",,,,
+1738,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“When I arrived at the house,” continued Holmes, “I at once went very
+carefully round it to observe if there were any traces in the snow
+which might help me. I knew that none had fallen since the evening
+before, and also that there had been a strong frost to preserve
+impressions. I passed along the tradesmen’s path, but found it all
+trampled down and indistinguishable. Just beyond it, however, at the
+far side of the kitchen door, a woman had stood and talked with a man,
+whose round impressions on one side showed that he had a wooden leg. I
+could even tell that they had been disturbed, for the woman had run
+back swiftly to the door, as was shown by the deep toe and light heel
+marks, while Wooden-leg had waited a little, and then had gone away. I
+thought at the time that this might be the maid and her sweetheart, of
+whom you had already spoken to me, and inquiry showed it was so. I
+passed round the garden without seeing anything more than random
+tracks, which I took to be the police; but when I got into the stable
+lane a very long and complex story was written in the snow in front of
+me.
+[PARAGRAPH 2]
+“There was a double line of tracks of a booted man, and a second double
+line which I saw with delight belonged to a man with naked feet. I was
+at once convinced from what you had told me that the latter was your
+son. The first had walked both ways, but the other had run swiftly, and
+as his tread was marked in places over the depression of the boot, it
+was obvious that he had passed after the other. I followed them up and
+found they led to the hall window, where Boots had worn all the snow
+away while waiting. Then I walked to the other end, which was a hundred
+yards or more down the lane. I saw where Boots had faced round, where
+the snow was cut up as though there had been a struggle, and, finally,
+where a few drops of blood had fallen, to show me that I was not
+mistaken. Boots had then run down the lane, and another little smudge
+of blood showed that it was he who had been hurt. When he came to the
+high road at the other end, I found that the pavement had been cleared,
+so there was an end to that clue.
+[PARAGRAPH 3]
 “On entering the house, however, I examined, as you remember, the sill
 and framework of the hall window with my lens, and I could at once see
 that someone had passed out. I could distinguish the outline of an
@@ -401,6 +638,7 @@ causing injuries which neither alone could have effected. He had
 returned with the prize, but had left a fragment in the grasp of his
 opponent. So far I was clear. The question now was, who was the man, and
 who was it brought him the coronet?
+[PARAGRAPH 4]
 “It is an old maxim of mine that when you have excluded the impossible,
 whatever remains, however improbable, must be the truth. Now, I knew
 that it was not you who had brought it down, so there only remained
@@ -418,14 +656,46 @@ heard of him before as being a man of evil reputation among women. It
 must have been he who wore those boots and retained the missing gems.
 Even though he knew that Arthur had discovered him, he might still
 flatter himself that he was safe, for the lad could not say a word
-without compromising his own family.","“Well, indeed, it was the only reason that I had not seen her.”
+without compromising his own family.","“You have explained that she was in the house for some time during the
+night, when the lady had gone.”
 
 
-“But I did not see that it was true. And yet, upon the contrary,
-the boy’s face showed. It was the only
-reason that I had seen him. He was the man who had brought it down, and
-he was",,,,
-1739,E1,"[CONTEXT]
+“Then she went to see the maid, and how she had
+gone down that stair.”
+
+
+“It was at the same time that the lady came back. She saw that the maid",,,,
+1739,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“There was a double line of tracks of a booted man, and a second double
+line which I saw with delight belonged to a man with naked feet. I was
+at once convinced from what you had told me that the latter was your
+son. The first had walked both ways, but the other had run swiftly, and
+as his tread was marked in places over the depression of the boot, it
+was obvious that he had passed after the other. I followed them up and
+found they led to the hall window, where Boots had worn all the snow
+away while waiting. Then I walked to the other end, which was a hundred
+yards or more down the lane. I saw where Boots had faced round, where
+the snow was cut up as though there had been a struggle, and, finally,
+where a few drops of blood had fallen, to show me that I was not
+mistaken. Boots had then run down the lane, and another little smudge
+of blood showed that it was he who had been hurt. When he came to the
+high road at the other end, I found that the pavement had been cleared,
+so there was an end to that clue.
+[PARAGRAPH 2]
+“On entering the house, however, I examined, as you remember, the sill
+and framework of the hall window with my lens, and I could at once see
+that someone had passed out. I could distinguish the outline of an
+instep where the wet foot had been placed in coming in. I was then
+beginning to be able to form an opinion as to what had occurred. A man
+had waited outside the window; someone had brought the gems; the deed
+had been overseen by your son; he had pursued the thief; had struggled
+with him; they had each tugged at the coronet, their united strength
+causing injuries which neither alone could have effected. He had
+returned with the prize, but had left a fragment in the grasp of his
+opponent. So far I was clear. The question now was, who was the man, and
+who was it brought him the coronet?
+[PARAGRAPH 3]
 “It is an old maxim of mine that when you have excluded the impossible,
 whatever remains, however improbable, must be the truth. Now, I knew
 that it was not you who had brought it down, so there only remained
@@ -436,6 +706,7 @@ explanation why he should retain her secret—the more so as the secret
 was a disgraceful one. When I remembered that you had seen her at that
 window, and how she had fainted on seeing the coronet again, my
 conjecture became a certainty.
+[PARAGRAPH 4]
 “And who could it be who was her confederate? A lover evidently, for
 who else could outweigh the love and gratitude which she must feel to
 you? I knew that you went out little, and that your circle of friends
@@ -450,12 +721,39 @@ an acquaintance with his valet, learned that his master had cut his
 head the night before, and, finally, at the expense of six shillings,
 made all sure by buying a pair of his cast-off shoes. With these I
 journeyed down to Streatham and saw that they exactly fitted the
-tracks.”","“He had not told me all that I knew, and he had not. The fact is, you
-could not have known the truth. I had known that you were to meet him there
-in the evening, and he had not. His eyes were in the dark, and his
-sudden loss of consciousness made me wonder what was going on. I
-would hardly have thought so",,,,
-1740,E1,"[CONTEXT]
+tracks.”","“There was no doubt in my mind that he had the honour to do so,
+and I thought that it was better to have that honour. The question now
+is, is that she had done this?”
+
+
+“Well, no, I cannot say. It is impossible, therefore, to explain the
+why she did this. I have heard",,,,
+1740,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“On entering the house, however, I examined, as you remember, the sill
+and framework of the hall window with my lens, and I could at once see
+that someone had passed out. I could distinguish the outline of an
+instep where the wet foot had been placed in coming in. I was then
+beginning to be able to form an opinion as to what had occurred. A man
+had waited outside the window; someone had brought the gems; the deed
+had been overseen by your son; he had pursued the thief; had struggled
+with him; they had each tugged at the coronet, their united strength
+causing injuries which neither alone could have effected. He had
+returned with the prize, but had left a fragment in the grasp of his
+opponent. So far I was clear. The question now was, who was the man, and
+who was it brought him the coronet?
+[PARAGRAPH 2]
+“It is an old maxim of mine that when you have excluded the impossible,
+whatever remains, however improbable, must be the truth. Now, I knew
+that it was not you who had brought it down, so there only remained
+your niece and the maids. But if it were the maids, why should your son
+allow himself to be accused in their place? There could be no possible
+reason. As he loved his cousin, however, there was an excellent
+explanation why he should retain her secret—the more so as the secret
+was a disgraceful one. When I remembered that you had seen her at that
+window, and how she had fainted on seeing the coronet again, my
+conjecture became a certainty.
+[PARAGRAPH 3]
 “And who could it be who was her confederate? A lover evidently, for
 who else could outweigh the love and gratitude which she must feel to
 you? I knew that you went out little, and that your circle of friends
@@ -465,6 +763,7 @@ must have been he who wore those boots and retained the missing gems.
 Even though he knew that Arthur had discovered him, he might still
 flatter himself that he was safe, for the lad could not say a word
 without compromising his own family.
+[PARAGRAPH 4]
 “Well, your own good sense will suggest what measures I took next. I
 went in the shape of a loafer to Sir George’s house, managed to pick up
 an acquaintance with his valet, learned that his master had cut his
@@ -472,15 +771,37 @@ head the night before, and, finally, at the expense of six shillings,
 made all sure by buying a pair of his cast-off shoes. With these I
 journeyed down to Streatham and saw that they exactly fitted the
 tracks.”","“I saw an ill-dressed vagabond in the lane yesterday evening,” said Mr.
-Holder.","“It was all right,” said Holmes. “I’d like to hear your very own advice.”
+Holder.","“Yes, sir, sir, I was surprised that you had come in to visit me.”
 
 
-“I should know where to look,” said Holmes. “I should be in London,
-and I’ll tell you the key to your hotel.”
+“Quite so, sir.” said Holmes, nodding. “I went in and
+made sure that the two were not mistaken.”
 
 
-“",,,,
-1741,E1,"[CONTEXT]
+“No, sir, I don’t think I am",,,,
+1741,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“It is an old maxim of mine that when you have excluded the impossible,
+whatever remains, however improbable, must be the truth. Now, I knew
+that it was not you who had brought it down, so there only remained
+your niece and the maids. But if it were the maids, why should your son
+allow himself to be accused in their place? There could be no possible
+reason. As he loved his cousin, however, there was an excellent
+explanation why he should retain her secret—the more so as the secret
+was a disgraceful one. When I remembered that you had seen her at that
+window, and how she had fainted on seeing the coronet again, my
+conjecture became a certainty.
+[PARAGRAPH 2]
+“And who could it be who was her confederate? A lover evidently, for
+who else could outweigh the love and gratitude which she must feel to
+you? I knew that you went out little, and that your circle of friends
+was a very limited one. But among them was Sir George Burnwell. I had
+heard of him before as being a man of evil reputation among women. It
+must have been he who wore those boots and retained the missing gems.
+Even though he knew that Arthur had discovered him, he might still
+flatter himself that he was safe, for the lad could not say a word
+without compromising his own family.
+[PARAGRAPH 3]
 “Well, your own good sense will suggest what measures I took next. I
 went in the shape of a loafer to Sir George’s house, managed to pick up
 an acquaintance with his valet, learned that his master had cut his
@@ -488,6 +809,7 @@ head the night before, and, finally, at the expense of six shillings,
 made all sure by buying a pair of his cast-off shoes. With these I
 journeyed down to Streatham and saw that they exactly fitted the
 tracks.”
+[PARAGRAPH 4]
 “I saw an ill-dressed vagabond in the lane yesterday evening,” said Mr.
 Holder.","“Precisely. It was I. I found that I had my man, so I came home and
 changed my clothes. It was a delicate part which I had to play then,
@@ -505,15 +827,37 @@ the address of the receiver who had them, on promising him that there
 would be no prosecution. Off I set to him, and after much chaffering I
 got our stones at £ 1000 apiece. Then I looked in upon your son, told
 him that all was right, and eventually got to my bed about two o’clock,
-after what I may call a really hard day’s work.”","“Well, it is very very plain,” said he. “It is a very thin, light
-bed, with a thin, narrow central panel. You will see, however, that a
-tire-piece is attached to the outer piece.”
+after what I may call a really hard day’s work.”","“That’s a very small advertisement,” said Holmes, smiling, “but it is a very good
+book.”
 
 
-“And of course,” he said, “this is a very",,,,
-1742,E1,"[CONTEXT]
+“It is in my pocket, sir.”
+
+
+“The money is very good, Mr. Holmes.” said he. “It is so good that if",,,,
+1742,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“And who could it be who was her confederate? A lover evidently, for
+who else could outweigh the love and gratitude which she must feel to
+you? I knew that you went out little, and that your circle of friends
+was a very limited one. But among them was Sir George Burnwell. I had
+heard of him before as being a man of evil reputation among women. It
+must have been he who wore those boots and retained the missing gems.
+Even though he knew that Arthur had discovered him, he might still
+flatter himself that he was safe, for the lad could not say a word
+without compromising his own family.
+[PARAGRAPH 2]
+“Well, your own good sense will suggest what measures I took next. I
+went in the shape of a loafer to Sir George’s house, managed to pick up
+an acquaintance with his valet, learned that his master had cut his
+head the night before, and, finally, at the expense of six shillings,
+made all sure by buying a pair of his cast-off shoes. With these I
+journeyed down to Streatham and saw that they exactly fitted the
+tracks.”
+[PARAGRAPH 3]
 “I saw an ill-dressed vagabond in the lane yesterday evening,” said Mr.
 Holder.
+[PARAGRAPH 4]
 “Precisely. It was I. I found that I had my man, so I came home and
 changed my clothes. It was a delicate part which I had to play then,
 for I saw that a prosecution must be avoided to avert scandal, and I
@@ -536,13 +880,24 @@ not find me ungrateful for what you have done. Your skill has indeed
 exceeded all that I have heard of it. And now I must fly to my dear boy
 to apologise to him for the wrong which I have done him. As to what you
 tell me of poor Mary, it goes to my very heart. Not even your skill can
-inform me where she is now.”","“Well, my son has had some dreadful sickness,” said Holmes. “But I’ll tell you what he has done.”
+inform me where she is now.”","“So that is what you intend, Mr. Holmes,” said I, “for I do not think that you should
+have taken my place in such a situation. You’ll be fine, Mr. Holmes.”
 
 
-“You cannot be sure that his wife would know that he was a criminal,
-and if his wife knew that he was a criminal he would not
-have had to go on a night’",,,,
-1743,E1,"[CONTEXT]
+“But I don’t think that you should have done anything more wrong, Mr. Holmes, than",,,,
+1743,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“Well, your own good sense will suggest what measures I took next. I
+went in the shape of a loafer to Sir George’s house, managed to pick up
+an acquaintance with his valet, learned that his master had cut his
+head the night before, and, finally, at the expense of six shillings,
+made all sure by buying a pair of his cast-off shoes. With these I
+journeyed down to Streatham and saw that they exactly fitted the
+tracks.”
+[PARAGRAPH 2]
+“I saw an ill-dressed vagabond in the lane yesterday evening,” said Mr.
+Holder.
+[PARAGRAPH 3]
 “Precisely. It was I. I found that I had my man, so I came home and
 changed my clothes. It was a delicate part which I had to play then,
 for I saw that a prosecution must be avoided to avert scandal, and I
@@ -560,6 +915,7 @@ would be no prosecution. Off I set to him, and after much chaffering I
 got our stones at £ 1000 apiece. Then I looked in upon your son, told
 him that all was right, and eventually got to my bed about two o’clock,
 after what I may call a really hard day’s work.”
+[PARAGRAPH 4]
 “A day which has saved England from a great public scandal,” said the
 banker, rising. “Sir, I cannot find words to thank you, but you shall
 not find me ungrateful for what you have done. Your skill has indeed
@@ -569,13 +925,37 @@ tell me of poor Mary, it goes to my very heart. Not even your skill can
 inform me where she is now.”","“I think that we may safely say,” returned Holmes, “that she is
 wherever Sir George Burnwell is. It is equally certain, too, that
 whatever her sins are, they will soon receive a more than sufficient
-punishment.”","“I cannot have had that last word,” said he. “I will tell you that I have been
-in touch with you at a very late hour.”
+punishment.”","“You have a great deal to lose in the matter. Now, you know, the point is, as
+I am sure, that I am never too late to see your son again.”
 
 
-“You are a very good man, sir,” said he, in his most solemn and earnest
-voice. “I promise that you will not be in this",,,,
-1744,E1,"[CONTEXT]
+“I will not tell you. But I was thinking it would be a good deal to
+have the stones back in the house.”
+
+[",,,,
+1744,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“I saw an ill-dressed vagabond in the lane yesterday evening,” said Mr.
+Holder.
+[PARAGRAPH 2]
+“Precisely. It was I. I found that I had my man, so I came home and
+changed my clothes. It was a delicate part which I had to play then,
+for I saw that a prosecution must be avoided to avert scandal, and I
+knew that so astute a villain would see that our hands were tied in the
+matter. I went and saw him. At first, of course, he denied everything.
+But when I gave him every particular that had occurred, he tried to
+bluster and took down a life-preserver from the wall. I knew my man,
+however, and I clapped a pistol to his head before he could strike.
+Then he became a little more reasonable. I told him that we would give
+him a price for the stones he held—£ 1000 apiece. That brought out the
+first signs of grief that he had shown. ‘Why, dash it all!’ said he,
+‘I’ve let them go at six hundred for the three!’ I soon managed to get
+the address of the receiver who had them, on promising him that there
+would be no prosecution. Off I set to him, and after much chaffering I
+got our stones at £ 1000 apiece. Then I looked in upon your son, told
+him that all was right, and eventually got to my bed about two o’clock,
+after what I may call a really hard day’s work.”
+[PARAGRAPH 3]
 “A day which has saved England from a great public scandal,” said the
 banker, rising. “Sir, I cannot find words to thank you, but you shall
 not find me ungrateful for what you have done. Your skill has indeed
@@ -583,21 +963,48 @@ exceeded all that I have heard of it. And now I must fly to my dear boy
 to apologise to him for the wrong which I have done him. As to what you
 tell me of poor Mary, it goes to my very heart. Not even your skill can
 inform me where she is now.”
+[PARAGRAPH 4]
 “I think that we may safely say,” returned Holmes, “that she is
 wherever Sir George Burnwell is. It is equally certain, too, that
 whatever her sins are, they will soon receive a more than sufficient
-punishment.”",XII. THE ADVENTURE OF THE COPPER BEECHES,"“Then I shall go to London, and I am going to London by the night—and
-not until the morning before.”
-
-
-“Well, I shall do that in a minute.” He stood firm and
-thrown up at a chair. “But you may not. It is very hard to
-find a word.”",,,,
-1745,E1,"[CONTEXT]
+punishment.”",XII. THE ADVENTURE OF THE COPPER BEECHES,"“You may be right. Let me tell you, in any way, that I am sorry that you have
+made me so foolish in my case. You had no reason to believe that my client
+was so stupid that I should have taken no action to stop him, and
+you had nothing to lose. I have been so wrong by that point. I could
+not have been more",,,,
+1745,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“Precisely. It was I. I found that I had my man, so I came home and
+changed my clothes. It was a delicate part which I had to play then,
+for I saw that a prosecution must be avoided to avert scandal, and I
+knew that so astute a villain would see that our hands were tied in the
+matter. I went and saw him. At first, of course, he denied everything.
+But when I gave him every particular that had occurred, he tried to
+bluster and took down a life-preserver from the wall. I knew my man,
+however, and I clapped a pistol to his head before he could strike.
+Then he became a little more reasonable. I told him that we would give
+him a price for the stones he held—£ 1000 apiece. That brought out the
+first signs of grief that he had shown. ‘Why, dash it all!’ said he,
+‘I’ve let them go at six hundred for the three!’ I soon managed to get
+the address of the receiver who had them, on promising him that there
+would be no prosecution. Off I set to him, and after much chaffering I
+got our stones at £ 1000 apiece. Then I looked in upon your son, told
+him that all was right, and eventually got to my bed about two o’clock,
+after what I may call a really hard day’s work.”
+[PARAGRAPH 2]
+“A day which has saved England from a great public scandal,” said the
+banker, rising. “Sir, I cannot find words to thank you, but you shall
+not find me ungrateful for what you have done. Your skill has indeed
+exceeded all that I have heard of it. And now I must fly to my dear boy
+to apologise to him for the wrong which I have done him. As to what you
+tell me of poor Mary, it goes to my very heart. Not even your skill can
+inform me where she is now.”
+[PARAGRAPH 3]
 “I think that we may safely say,” returned Holmes, “that she is
 wherever Sir George Burnwell is. It is equally certain, too, that
 whatever her sins are, they will soon receive a more than sufficient
 punishment.”
+[PARAGRAPH 4]
 XII. THE ADVENTURE OF THE COPPER BEECHES","“To the man who loves art for its own sake,” remarked Sherlock Holmes,
 tossing aside the advertisement sheet of _The Daily Telegraph_, “it is
 frequently in its least important and lowliest manifestations that the
@@ -609,17 +1016,30 @@ not so much to the many _causes célèbres_ and sensational trials in
 which I have figured but rather to those incidents which may have been
 trivial in themselves, but which have given room for those faculties of
 deduction and of logical synthesis which I have made my special
-province.”","“I have a very good feeling that this case is very strange.”
+province.”","“It is evident that the man who will take the lead is himself,” said he.
+[PARAGRAPH 5]
+“I don’t know how you would describe it. Why?”
 
 
-“I had hoped to find the most important facts in the matter,” remarked Sir Henry. “There is
-nothing to tell of it, but I am not sure that it is a great
-matter.”
-
-
-“I shall",,,,
-1746,E1,"[CONTEXT]
+“Because he is an ambitious man, and he is not a very good man, and the
+will of the Lord has",,,,
+1746,E5,"[CONTEXT]
+[PARAGRAPH 1]
+“A day which has saved England from a great public scandal,” said the
+banker, rising. “Sir, I cannot find words to thank you, but you shall
+not find me ungrateful for what you have done. Your skill has indeed
+exceeded all that I have heard of it. And now I must fly to my dear boy
+to apologise to him for the wrong which I have done him. As to what you
+tell me of poor Mary, it goes to my very heart. Not even your skill can
+inform me where she is now.”
+[PARAGRAPH 2]
+“I think that we may safely say,” returned Holmes, “that she is
+wherever Sir George Burnwell is. It is equally certain, too, that
+whatever her sins are, they will soon receive a more than sufficient
+punishment.”
+[PARAGRAPH 3]
 XII. THE ADVENTURE OF THE COPPER BEECHES
+[PARAGRAPH 4]
 “To the man who loves art for its own sake,” remarked Sherlock Holmes,
 tossing aside the advertisement sheet of _The Daily Telegraph_, “it is
 frequently in its least important and lowliest manifestations that the
@@ -632,8 +1052,7 @@ which I have figured but rather to those incidents which may have been
 trivial in themselves, but which have given room for those faculties of
 deduction and of logical synthesis which I have made my special
 province.”","“And yet,” said I, smiling, “I cannot quite hold myself absolved from
-the charge of sensationalism which has been urged against my records.”","“So, Watson, your good-bye,” said he. “I am glad to see you
-now. I am sure that I will never be disappointed. I have known you
-for a long time, Watson, and I have had a great deal of interest
-in your study of the matter. It was after the death of Dr. Watson of
-the Royal College",,,,
+the charge of sensationalism which has been urged against my records.”","“Then, as for the case of the other, you are certain that _it is not _the_ man _who is _the_ man_.”
+
+
+“But, as I have remarked, the man who is _the_ man_ and _the_ man_ who is _the_ man_ who is _the_ man_ who is",,,,

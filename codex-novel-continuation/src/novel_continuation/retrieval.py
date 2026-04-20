@@ -60,11 +60,11 @@ def query_tfidf_index(
     ranked_indices = scores.argsort()[::-1][:top_k]
     return [
         {
-            "text": active_candidates[index],
-            "candidate_index": int(index),
-            "score": float(scores[index]),
+            "text": active_candidates[idx],
+            "candidate_index": int(idx),
+            "score": float(scores[idx]),
         }
-        for index in ranked_indices
+        for idx in ranked_indices
     ]
 
 

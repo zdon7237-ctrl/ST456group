@@ -138,8 +138,8 @@ def generate_rows(
             temperature=temperature if do_sample else None,
             pad_token_id=tokenizer.eos_token_id,
         )
-        full_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-        generated_text = full_text[len(inference_prompt):].strip() if full_text.startswith(inference_prompt) else full_text.strip()
+        prompt_length = encoded["input_ids"].shape[1]
+        generated_text = tokenizer.decode(generated_ids[0][prompt_length:], skip_special_tokens=True).strip()
         generated_text = generated_text.replace("[TARGET]", "").strip()
         generated_rows.append(
             {

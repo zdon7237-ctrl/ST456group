@@ -1,0 +1,42 @@
+{
+  "config": {
+    "context_size": 2,
+    "context_format": "structured",
+    "training_mode": "full",
+    "aux_objective": "none",
+    "aux_weight": 0.1,
+    "max_target_tokens": 176,
+    "num_negative_candidates": 3,
+    "selection_metric": "perplexity",
+    "use_retrieval": false,
+    "top_k": 0,
+    "warmup_steps": 20,
+    "max_grad_norm": 1.0,
+    "model_name": "distilgpt2",
+    "train_path": "/content/ST456group/codex-novel-continuation/data/processed/train.jsonl",
+    "eval_path": "/content/ST456group/codex-novel-continuation/data/processed/val.jsonl",
+    "output_dir": "/content/ST456group/codex-novel-continuation/artifacts/e2_structured_full",
+    "max_length": 512,
+    "batch_size": 2,
+    "gradient_accumulation_steps": 4,
+    "num_train_epochs": 1,
+    "learning_rate": 5e-05,
+    "logging_steps": 10,
+    "save_steps": 50
+  },
+  "metadata": {
+    "token_budget": {
+      "max_target_tokens": 176,
+      "train": {
+        "avg_total_tokens": 241.80548722800378,
+        "max_total_tokens": 1150.0,
+        "truncation_rate": 0.05714285714285714
+      },
+      "eval": {
+        "avg_total_tokens": 218.61212121212122,
+        "max_total_tokens": 893.0,
+        "truncation_rate": 0.04393939393939394
+      }
+    }
+  }
+}
