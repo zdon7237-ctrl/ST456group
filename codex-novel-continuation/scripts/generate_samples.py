@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import random
 import sys
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -25,6 +26,20 @@ def load_training_metadata(model_dir: Path) -> dict:
     if not metadata_path.exists():
         return {}
     return json.loads(metadata_path.read_text(encoding="utf-8"))
+
+
+def set_generation_seed(seed: int | None) -> None:
+    if seed is None:
+        return
+
+    import numpy as np
+    import torch
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 def load_jsonl(path: Path) -> list[dict]:
     if not path.exists():
@@ -81,6 +96,9 @@ def generate_rows(
     do_sample: bool = True,
     top_p: float = 0.95,
     temperature: float = 0.8,
+    seed: int | None = None,
+    model=None,
+    tokenizer=None,
 ) -> list[dict]:
     if not model_dir.exists():
         raise FileNotFoundError(
@@ -93,7 +111,9 @@ def generate_rows(
 
     import torch
 
-    model, tokenizer = load_trained_model_and_tokenizer(model_dir)
+    set_generation_seed(seed)
+    if model is None or tokenizer is None:
+        model, tokenizer = load_trained_model_and_tokenizer(model_dir)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = model.to(device).eval()
 
@@ -178,6 +198,7 @@ def main() -> None:
     parser.add_argument("--top-k", type=int, default=2)
     parser.add_argument("--use-retrieval", action="store_true")
     parser.add_argument("--context-format", choices=["plain", "structured"], default=None)
+    parser.add_argument("--seed", type=int, default=None)
     args = parser.parse_args()
 
     rows = load_jsonl(args.input_path)
@@ -193,6 +214,7 @@ def main() -> None:
         do_sample=args.do_sample,
         top_p=args.top_p,
         temperature=args.temperature,
+        seed=args.seed,
     )
     write_jsonl(generated_rows, args.output_path)
 

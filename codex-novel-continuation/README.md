@@ -39,7 +39,7 @@ The headline automatic metrics are:
 The project also keeps:
 
 - `entity_overlap` as a diagnostic metric
-- human evaluation focused on contextual coherence, character consistency, and fluency
+- human evaluation focused on contextual coherence, character consistency, and fluency as an optional appendix step
 
 ## Setup
 
@@ -62,10 +62,10 @@ pip install -r requirements.txt
 1. Download the Sherlock Holmes corpus.
 2. Build paragraph-level continuation datasets.
 3. Inspect token budgets before training.
-4. Run E1-E5 in Colab.
-5. Generate held-out samples.
-6. Run automatic evaluation.
-7. Export human-evaluation sheets.
+4. Train E1-E5 plus the E5 `aux_weight=0.2` companion run.
+5. Run 3-seed held-out generation and automatic evaluation.
+6. Compare E5 variants with validation main loss, then report test metrics.
+7. Optionally export human-evaluation sheets.
 8. Optionally run retrieval as an appendix experiment.
 
 ## Important Scripts
@@ -76,6 +76,7 @@ pip install -r requirements.txt
 - `scripts/train_experiment.py`
 - `scripts/generate_samples.py`
 - `scripts/run_auto_eval.py`
+- `scripts/run_eval_3seed.py`
 - `scripts/prepare_human_eval.py`
 
 ## Important Configs
@@ -85,6 +86,7 @@ pip install -r requirements.txt
 - `configs/e3_distilgpt2_structured_long_context.yaml`
 - `configs/e4_distilgpt2_structured_lora.yaml`
 - `configs/e5_distilgpt2_structured_aux_ranking.yaml`
+- `configs/e5_distilgpt2_structured_aux_ranking_wide.yaml`
 - `configs/retrieval_distilgpt2.yaml` for the appendix experiment
 
 ## Colab Guides

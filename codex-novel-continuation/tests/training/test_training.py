@@ -5,8 +5,10 @@ import types
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
+from novel_continuation.trainer_runtime import TARGET_SECTION_PREFIX, ContinuationDataCollator, encode_target_with_prefix
 from novel_continuation.training import (
     attach_retrieval,
+    build_eval_rows_from_prepared_records,
     choose_max_target_tokens,
     load_trained_model_and_tokenizer,
     load_jsonl_records,
@@ -27,8 +29,9 @@ def test_load_training_config_reads_model_name(tmp_path):
     assert config["context_format"] == "plain"
     assert config["training_mode"] == "full"
     assert config["aux_objective"] == "none"
-    assert config["selection_metric"] == "perplexity"
     assert config["use_retrieval"] is False
+    assert config["seed"] == 42
+    assert "selection_metric" not in config
 
 
 def test_load_training_config_resolves_relative_paths_from_project_root(tmp_path):
@@ -145,6 +148,20 @@ def test_validate_baseline_config_rejects_retrieval_mode():
         raise AssertionError("Expected ValueError when baseline config enables retrieval")
 
 
+def test_validate_baseline_config_rejects_removed_selection_metric():
+    config = {
+        "model_name": "distilgpt2",
+        "selection_metric": "perplexity",
+    }
+
+    try:
+        validate_baseline_config(config)
+    except ValueError as exc:
+        assert "selection_metric" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError when deprecated selection_metric is provided")
+
+
 def test_choose_max_target_tokens_uses_p90_rounding_and_cap():
     value = choose_max_target_tokens([10, 20, 30, 40, 155, 161, 162, 163, 164, 165])
     assert value == 176
@@ -256,6 +273,110 @@ def test_prepare_training_records_skips_auxiliary_candidates_when_disabled():
 
     assert "candidate_targets" not in prepared[0]
     assert "candidate_labels" not in prepared[0]
+
+
+class _CharTokenizer:
+    pad_token_id = 0
+    pad_token = "<pad>"
+    eos_token = "<eos>"
+    eos_token_id = 9999
+
+    def __call__(self, text, add_special_tokens=False, return_tensors=None, truncation=False, max_length=None):
+        input_ids = [ord(char) for char in text]
+        if truncation and max_length is not None:
+            input_ids = input_ids[:max_length]
+        if return_tensors == "pt":
+            return {
+                "input_ids": [[token for token in input_ids]],
+                "attention_mask": [[1] * len(input_ids)],
+            }
+        return {"input_ids": input_ids}
+
+    def decode(self, token_ids, clean_up_tokenization_spaces=False, skip_special_tokens=False):
+        return "".join(chr(token_id) for token_id in token_ids)
+
+
+def test_encode_target_with_prefix_splits_prefix_and_body():
+    tokenizer = _CharTokenizer()
+
+    prefix_ids, target_ids = encode_target_with_prefix(tokenizer, "Holmes", max_target_tokens=128)
+
+    assert tokenizer.decode(prefix_ids) == TARGET_SECTION_PREFIX
+    assert tokenizer.decode(target_ids) == "Holmes"
+
+
+def test_encode_target_with_prefix_raises_when_boundary_is_not_preserved():
+    class _BoundaryMergingTokenizer(_CharTokenizer):
+        def __call__(self, text, add_special_tokens=False, return_tensors=None, truncation=False, max_length=None):
+            if text == TARGET_SECTION_PREFIX:
+                return {"input_ids": [1, 2]}
+            if text.startswith(TARGET_SECTION_PREFIX):
+                return {"input_ids": [9, 9, 9]}
+            return super().__call__(
+                text,
+                add_special_tokens=add_special_tokens,
+                return_tensors=return_tensors,
+                truncation=truncation,
+                max_length=max_length,
+            )
+
+    try:
+        encode_target_with_prefix(_BoundaryMergingTokenizer(), "Holmes", max_target_tokens=128)
+    except ValueError as exc:
+        assert "prefix boundary" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError when the tokenizer does not preserve the target prefix boundary")
+
+
+def test_continuation_data_collator_masks_prompt_delimiter_and_target_prefix():
+    tokenizer = _CharTokenizer()
+    collator = ContinuationDataCollator(
+        tokenizer,
+        max_length=256,
+        max_target_tokens=128,
+        aux_objective="none",
+    )
+
+    batch = collator(
+        [
+            {
+                "context": ["Holmes spoke."],
+                "target": "Watson replied.",
+                "retrieved": [],
+                "context_format": "plain",
+                "include_retrieval": False,
+            }
+        ]
+    )
+
+    labels = batch["labels"][0].tolist()
+    input_ids = batch["input_ids"][0].tolist()
+    supervised_ids = [token for token, label in zip(input_ids, labels) if label != -100]
+    masked_ids = [token for token, label in zip(input_ids, labels) if label == -100]
+
+    assert tokenizer.decode(supervised_ids) == "Watson replied."
+    masked_text = tokenizer.decode(masked_ids)
+    assert "[CONTEXT]" in masked_text
+    assert TARGET_SECTION_PREFIX in masked_text
+
+
+def test_build_eval_rows_from_prepared_records_uses_prompt_builder_contract():
+    rows = build_eval_rows_from_prepared_records(
+        [
+            {
+                "context": ["p1", "p2"],
+                "target": "p3",
+                "retrieved": ["clue"],
+                "context_format": "structured",
+                "include_retrieval": True,
+            }
+        ]
+    )
+
+    assert rows[0]["gold_target"] == "p3"
+    assert "[PARAGRAPH 1]" in rows[0]["prompt"]
+    assert "[RETRIEVED]" in rows[0]["prompt"]
+    assert rows[0]["generated_text"] == "p3"
 
 
 def test_prepare_training_records_with_retrieval_uses_only_prior_candidates():
@@ -402,6 +523,12 @@ def test_generate_rows_uses_context_size_from_training_metadata(tmp_path, monkey
     class FakeModel:
         config = _FakeConfig()
 
+        def to(self, _device):
+            return self
+
+        def eval(self):
+            return self
+
         def generate(self, **kwargs):
             return [[1, 2, 3]]
 
@@ -411,8 +538,13 @@ def test_generate_rows_uses_context_size_from_training_metadata(tmp_path, monkey
         eos_token_id = 0
 
         def __call__(self, text, return_tensors=None, truncation=False, max_length=None):
+            import torch
+
             observed["prompt"] = text
-            return {"input_ids": [[1, 2]], "attention_mask": [[1, 1]]}
+            return {
+                "input_ids": torch.tensor([[1, 2]], dtype=torch.long),
+                "attention_mask": torch.tensor([[1, 1]], dtype=torch.long),
+            }
 
         def decode(self, *_args, **_kwargs):
             return observed["prompt"] + "\nGenerated."
@@ -430,6 +562,56 @@ def test_generate_rows_uses_context_size_from_training_metadata(tmp_path, monkey
     module.generate_rows(rows=rows, model_dir=model_dir, max_new_tokens=8, use_retrieval=False)
 
     assert "[CONTEXT]\nc2\nc3" in observed["prompt"]
+
+
+def test_generate_rows_passes_seed_to_generation_helper(tmp_path, monkeypatch):
+    script_path = Path(__file__).resolve().parents[2] / "scripts" / "generate_samples.py"
+    spec = importlib.util.spec_from_file_location("generate_samples", script_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError("Expected generate_samples.py to be importable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    observed = {}
+
+    class _FakeConfig:
+        n_positions = 1024
+
+    class FakeModel:
+        config = _FakeConfig()
+
+        def to(self, _device):
+            return self
+
+        def eval(self):
+            return self
+
+        def generate(self, **kwargs):
+            return [[1, 2, 3]]
+
+    class FakeTokenizer:
+        eos_token_id = 0
+
+        def __call__(self, text, return_tensors=None, truncation=False, max_length=None):
+            import torch
+
+            return {
+                "input_ids": torch.tensor([[1, 2]], dtype=torch.long),
+                "attention_mask": torch.tensor([[1, 1]], dtype=torch.long),
+            }
+
+        def decode(self, *_args, **_kwargs):
+            return "Generated."
+
+    monkeypatch.setattr(module, "load_trained_model_and_tokenizer", lambda _path: (FakeModel(), FakeTokenizer()))
+    monkeypatch.setattr(module, "set_generation_seed", lambda seed: observed.setdefault("seed", seed))
+
+    rows = [{"context": ["c0"], "target": "target"}]
+    module.generate_rows(rows=rows, model_dir=model_dir, max_new_tokens=8, use_retrieval=False, seed=2026)
+
+    assert observed["seed"] == 2026
 
 
 def test_load_trained_model_and_tokenizer_supports_plain_checkpoint(tmp_path, monkeypatch):
@@ -550,3 +732,58 @@ def test_inspect_token_stats_passes_context_size_to_budget_summary(tmp_path, mon
     assert output_path.exists()
     assert len(observed["calls"]) == 2
     assert all(call["context_size"] == 2 for call in observed["calls"])
+
+
+def test_run_eval_3seed_writes_per_seed_outputs_and_summary(tmp_path, monkeypatch):
+    script_path = Path(__file__).resolve().parents[2] / "scripts" / "run_eval_3seed.py"
+    spec = importlib.util.spec_from_file_location("run_eval_3seed", script_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError("Expected run_eval_3seed.py to be importable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    output_dir = tmp_path / "eval"
+    written_metrics = []
+
+    monkeypatch.setattr(module, "load_jsonl", lambda _path: [{"context": ["c1"], "target": "t1"}])
+    monkeypatch.setattr(module, "load_trained_model_and_tokenizer", lambda _path: ("model", "tokenizer"))
+    monkeypatch.setattr(
+        module,
+        "generate_rows",
+        lambda **kwargs: [{"prompt": "[CONTEXT]\nc1", "gold_target": "t1", "generated_text": f"g-{kwargs['seed']}"}],
+    )
+    monkeypatch.setattr(module, "write_jsonl", lambda rows, path: None)
+
+    def fake_evaluate(rows, model=None, tokenizer=None):
+        generated_text = rows[0]["generated_text"]
+        if generated_text.endswith("13"):
+            return {"num_samples": 1.0, "perplexity": 3.0, "rouge_l": 0.1, "bertscore_f1": 0.2, "entity_overlap": 0.3}
+        if generated_text.endswith("42"):
+            return {"num_samples": 1.0, "perplexity": 3.0, "rouge_l": 0.2, "bertscore_f1": 0.3, "entity_overlap": 0.4}
+        return {"num_samples": 1.0, "perplexity": 3.0, "rouge_l": 0.3, "bertscore_f1": 0.4, "entity_overlap": 0.5}
+
+    monkeypatch.setattr(module, "evaluate_generated_rows", fake_evaluate)
+    monkeypatch.setattr(module, "write_metrics_csv", lambda metrics, path: written_metrics.append((metrics, path.name)))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_eval_3seed.py",
+            "--experiment-id",
+            "e3",
+            "--model-dir",
+            str(model_dir),
+            "--output-dir",
+            str(output_dir),
+        ],
+    )
+
+    module.main()
+
+    summary_metrics = dict(written_metrics[-1][0])
+    assert written_metrics[-1][1] == "metrics_e3_summary.csv"
+    assert "perplexity_mean" in summary_metrics
+    assert "perplexity_std" not in summary_metrics
+    assert "rouge_l_std" in summary_metrics

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from novel_continuation.prompting import build_prompt, build_target_section
+from novel_continuation.prompting import build_prompt
+
+
+TARGET_SECTION_PREFIX = "[TARGET]\n"
 
 
 def truncate_text_to_tokens(tokenizer, text: str, max_tokens: int) -> str:
@@ -80,17 +83,16 @@ class ContinuationDataCollator:
         self.pad_token_id = tokenizer.pad_token_id
         self.delimiter_ids = tokenizer("\n\n", add_special_tokens=False)["input_ids"]
 
-    def _encode_target_section(self, target: str) -> list[int]:
-        truncated_target = truncate_text_to_tokens(
+    def _encode_target_section(self, target: str) -> tuple[list[int], list[int]]:
+        return encode_target_with_prefix(
             self.tokenizer,
             target,
-            self.max_target_tokens,
+            max_target_tokens=self.max_target_tokens,
         )
-        target_section = build_target_section(truncated_target)
-        return self.tokenizer(target_section, add_special_tokens=False)["input_ids"]
 
     def _encode_feature(self, feature: dict) -> tuple[list[int], list[int], str, list[int]]:
-        target_section_ids = self._encode_target_section(feature["target"])
+        target_prefix_ids, target_body_ids = self._encode_target_section(feature["target"])
+        target_section_ids = target_prefix_ids + target_body_ids
         max_prompt_tokens = max(0, self.max_length - len(self.delimiter_ids) - len(target_section_ids))
         prompt_text, prompt_ids = build_prompt_with_budget(
             self.tokenizer,
@@ -101,13 +103,14 @@ class ContinuationDataCollator:
             max_prompt_tokens=max_prompt_tokens,
         )
         full_input_ids = prompt_ids + self.delimiter_ids + target_section_ids
-        labels = list(full_input_ids)
+        labels = ([-100] * (len(prompt_ids) + len(self.delimiter_ids) + len(target_prefix_ids))) + target_body_ids
         return full_input_ids, labels, prompt_text, prompt_ids
 
     def _encode_candidate(self, prompt_ids: list[int], candidate_target: str) -> tuple[list[int], list[int]]:
-        target_section_ids = self._encode_target_section(candidate_target)
+        target_prefix_ids, target_body_ids = self._encode_target_section(candidate_target)
+        target_section_ids = target_prefix_ids + target_body_ids
         input_ids = prompt_ids + self.delimiter_ids + target_section_ids
-        labels = ([-100] * (len(prompt_ids) + len(self.delimiter_ids))) + target_section_ids
+        labels = ([-100] * (len(prompt_ids) + len(self.delimiter_ids) + len(target_prefix_ids))) + target_body_ids
         return input_ids, labels
 
     def __call__(self, features: list[dict]):
@@ -233,3 +236,27 @@ def compute_candidate_scores(logits, labels):
     token_counts = token_mask.sum(dim=-1).clamp(min=1)
     normalised_loss = (losses * token_mask).sum(dim=-1) / token_counts
     return -normalised_loss
+
+
+def encode_target_with_prefix(
+    tokenizer,
+    target: str,
+    *,
+    max_target_tokens: int,
+) -> tuple[list[int], list[int]]:
+    truncated_target = truncate_text_to_tokens(
+        tokenizer,
+        target,
+        max_target_tokens,
+    )
+    prefix_ids = tokenizer(TARGET_SECTION_PREFIX, add_special_tokens=False)["input_ids"]
+    full_ids = tokenizer(
+        f"{TARGET_SECTION_PREFIX}{truncated_target}",
+        add_special_tokens=False,
+    )["input_ids"]
+    if full_ids[: len(prefix_ids)] != prefix_ids:
+        raise ValueError(
+            "Target section tokenization no longer preserves the [TARGET] prefix boundary. "
+            "Update the shared target encoding logic before training or evaluation."
+        )
+    return prefix_ids, full_ids[len(prefix_ids) :]

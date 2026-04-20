@@ -21,9 +21,11 @@ def main() -> None:
         type=Path,
         default=PROJECT_ROOT / "configs" / "baseline_distilgpt2.yaml",
     )
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
     config = load_training_config(args.config)
+    config["seed"] = args.seed
     train_baseline_model(config)
 
 

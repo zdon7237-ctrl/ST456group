@@ -142,9 +142,9 @@ notebook 会自动：
 7. 构建 `train/val/test` 数据集
 8. 跑 token budget 检查
 9. 训练主实验
-10. 生成样本
-11. 计算自动评估指标
-12. 导出人工评测 CSV
+10. 运行 3-seed 样本生成与自动评估
+11. 比较 E5 不同 `aux_weight` 的 validation main loss
+12. 可选导出人工评测 CSV
 13. 可选跑 retrieval appendix
 14. 可选打包并下载结果
 
@@ -177,6 +177,13 @@ notebook 会自动：
 
 这样会用完整的 3 epochs 训练和全量测试集评估。
 
+正式评估默认会对每个实验用 3 个固定 seed 做生成和自动评测，最终汇总成 `metrics_*_summary.csv`。
+
+其中：
+
+- `perplexity` 对固定 checkpoint 是确定性的，因此 summary 里只保留均值/单值解释
+- `ROUGE-L`、`BERTScore`、`entity_overlap` 会额外报告 seed 间波动
+
 ### 保守的分步设置
 
 如果不确定环境是否正常，可以先：
@@ -205,9 +212,13 @@ notebook 会自动：
 - `artifacts/e3_long_context/`
 - `artifacts/e4_lora/`
 - `artifacts/e5_aux_ranking/`
-- `artifacts/eval/generated_samples_*.jsonl`
-- `artifacts/eval/metrics_*.csv`
-- `artifacts/eval/human_eval_*.csv`
+- `artifacts/e5_aux_ranking_wide/`
+- `artifacts/eval/generated_samples_*_seed*.jsonl`
+- `artifacts/eval/metrics_*_seed*.csv`
+- `artifacts/eval/metrics_*_summary.csv`
+- `artifacts/eval/human_eval_*.csv`（如果你手动开启可选的人评导出）
+
+如果你同时跑了 E5 的两个 `aux_weight` 版本，应优先比较各自 `training_config.json` 中的 `metadata.validation.validation_main_loss`，再决定最终把哪一个 E5 放进主结果表。
 
 如果开启下载打包，notebook 还会生成：
 

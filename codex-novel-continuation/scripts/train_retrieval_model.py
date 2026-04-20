@@ -17,9 +17,11 @@ from novel_continuation.training import load_training_config, train_retrieval_mo
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train the appendix retrieval continuation model.")
     parser.add_argument("--config", type=Path, default=PROJECT_ROOT / "configs" / "retrieval_distilgpt2.yaml")
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
     config = load_training_config(args.config)
+    config["seed"] = args.seed
     config["use_retrieval"] = True
     train_retrieval_model(config)
 

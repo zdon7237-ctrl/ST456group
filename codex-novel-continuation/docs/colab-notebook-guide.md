@@ -41,72 +41,81 @@ Copy each block into a separate Colab cell.
 ## Cell 6: Train E1
 
 ```python
-!python scripts/train_experiment.py --config configs/e1_distilgpt2_plain_full.yaml
+!python scripts/train_experiment.py --config configs/e1_distilgpt2_plain_full.yaml --seed 42
 ```
 
 ## Cell 7: Train E2
 
 ```python
-!python scripts/train_experiment.py --config configs/e2_distilgpt2_structured_full.yaml
+!python scripts/train_experiment.py --config configs/e2_distilgpt2_structured_full.yaml --seed 42
 ```
 
 ## Cell 8: Train E3
 
 ```python
-!python scripts/train_experiment.py --config configs/e3_distilgpt2_structured_long_context.yaml
+!python scripts/train_experiment.py --config configs/e3_distilgpt2_structured_long_context.yaml --seed 42
 ```
 
 ## Cell 9: Train E4
 
 ```python
-!python scripts/train_experiment.py --config configs/e4_distilgpt2_structured_lora.yaml
+!python scripts/train_experiment.py --config configs/e4_distilgpt2_structured_lora.yaml --seed 42
 ```
 
 ## Cell 10: Train E5
 
 ```python
-!python scripts/train_experiment.py --config configs/e5_distilgpt2_structured_aux_ranking.yaml
+!python scripts/train_experiment.py --config configs/e5_distilgpt2_structured_aux_ranking.yaml --seed 42
 ```
 
-## Cell 11: Generate samples for one experiment
+## Cell 11: Train E5-wide (`aux_weight=0.2`)
 
 ```python
-!python scripts/generate_samples.py \
-  --model-dir artifacts/e3_long_context \
-  --output-path artifacts/eval/generated_samples_e3.jsonl
+!python scripts/train_experiment.py --config configs/e5_distilgpt2_structured_aux_ranking_wide.yaml --seed 42
 ```
 
-## Cell 12: Run automatic evaluation
+## Cell 12: Run 3-seed evaluation for one experiment
 
 ```python
-!python scripts/run_auto_eval.py \
+!python scripts/run_eval_3seed.py \
+  --experiment-id e3 \
   --model-dir artifacts/e3_long_context \
-  --generated-path artifacts/eval/generated_samples_e3.jsonl \
-  --output-path artifacts/eval/metrics_e3.csv
+  --output-dir artifacts/eval
 ```
 
-## Cell 13: Export human-eval CSV
+`metrics_*_summary.csv` reports means for all metrics, but standard deviation only for generation-based metrics. `perplexity` is deterministic for a fixed checkpoint, so it keeps a mean/single-value interpretation only.
+
+## Cell 13: Compare E5 variants with validation main loss
+
+```python
+!cat artifacts/e5_aux_ranking/training_config.json
+!cat artifacts/e5_aux_ranking_wide/training_config.json
+```
+
+Use `metadata.validation.validation_main_loss` to choose the final E5 variant.
+
+## Cell 14: Optional human-eval CSV export
 
 ```python
 !python scripts/prepare_human_eval.py \
-  --input-path artifacts/eval/generated_samples_e3.jsonl \
+  --input-path artifacts/eval/generated_samples_e3_seed13.jsonl \
   --output-path artifacts/eval/human_eval_e3.csv \
   --system-label "System E3"
 ```
 
-## Cell 14: Open the rubric
+## Cell 15: Open the rubric
 
 ```python
 !cat docs/human-eval-rubric.md
 ```
 
-## Cell 15: Appendix retrieval experiment
+## Cell 16: Appendix retrieval experiment
 
 ```python
 !python scripts/train_retrieval_model.py --config configs/retrieval_distilgpt2.yaml
 ```
 
-## Cell 16: Update the experiment log
+## Cell 17: Update the experiment log
 
 ```python
 !cat docs/experiments/experiment-log.md

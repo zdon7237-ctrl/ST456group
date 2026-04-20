@@ -5,10 +5,14 @@ from __future__ import annotations
 import csv
 import math
 import re
+import statistics
 from pathlib import Path
+
+from novel_continuation.trainer_runtime import TARGET_SECTION_PREFIX, encode_target_with_prefix
 
 
 ENTITY_PATTERN = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b")
+GENERATION_METRIC_KEYS = ("rouge_l", "bertscore_f1", "entity_overlap")
 
 
 def _tokenize(text: str) -> list[str]:
@@ -73,26 +77,95 @@ def compute_bertscore(reference_texts: list[str], generated_texts: list[str]) ->
     return float(f1.mean().item())
 
 
-def compute_perplexity(model, tokenizer, texts: list[str]) -> float:
+def _resolve_model_max_length(model, tokenizer) -> int:
+    for attr in ("n_positions", "max_position_embeddings"):
+        value = getattr(model.config, attr, None)
+        if isinstance(value, int) and value > 0:
+            return value
+    model_max_length = getattr(tokenizer, "model_max_length", None)
+    if isinstance(model_max_length, int) and 0 < model_max_length < 10**6:
+        return model_max_length
+    return 1024
+
+
+def build_conditional_ppl_example(
+    tokenizer,
+    *,
+    prompt: str,
+    gold_target: str,
+    max_length: int,
+) -> tuple[list[int], list[int]]:
+    delimiter_ids = tokenizer("\n\n", add_special_tokens=False)["input_ids"]
+    prompt_ids = tokenizer(prompt, add_special_tokens=False)["input_ids"]
+    prefix_only_ids = tokenizer(TARGET_SECTION_PREFIX, add_special_tokens=False)["input_ids"]
+    max_target_tokens = max(0, max_length - len(delimiter_ids) - len(prefix_only_ids))
+    prefix_ids, target_ids = encode_target_with_prefix(
+        tokenizer,
+        gold_target,
+        max_target_tokens=max_target_tokens,
+    )
+    max_prompt_tokens = max(0, max_length - len(delimiter_ids) - len(prefix_ids) - len(target_ids))
+    prompt_ids = prompt_ids[-max_prompt_tokens:] if max_prompt_tokens else []
+    input_ids = prompt_ids + delimiter_ids + prefix_ids + target_ids
+    labels = ([-100] * (len(prompt_ids) + len(delimiter_ids) + len(prefix_ids))) + target_ids
+    return input_ids, labels
+
+
+def _accumulate_shifted_nll(logits, labels) -> tuple[float, int]:
+    import torch
+    import torch.nn.functional as F
+
+    shifted_logits = logits[..., :-1, :].contiguous()
+    shifted_labels = labels[..., 1:].contiguous()
+    token_losses = F.cross_entropy(
+        shifted_logits.view(-1, shifted_logits.size(-1)),
+        shifted_labels.view(-1),
+        reduction="none",
+        ignore_index=-100,
+    ).view(shifted_labels.size())
+    token_mask = shifted_labels.ne(-100)
+    supervised_tokens = int(token_mask.sum().item())
+    total_nll = float((token_losses * token_mask).sum().item())
+    return total_nll, supervised_tokens
+
+
+def compute_perplexity(model, tokenizer, rows: list[dict[str, str]]) -> float:
     import torch
 
-    if not texts:
-        raise ValueError("texts must not be empty")
+    if not rows:
+        raise ValueError("rows must not be empty")
 
-    losses: list[float] = []
+    max_length = _resolve_model_max_length(model, tokenizer)
+    total_nll = 0.0
+    total_supervised_tokens = 0
     try:
         from tqdm import tqdm
-        text_iter = tqdm(texts, desc="计算 perplexity", unit="条")
+        row_iter = tqdm(rows, desc="计算 perplexity", unit="条")
     except ImportError:
-        text_iter = texts
+        row_iter = rows
     device = next(model.parameters()).device
-    for text in text_iter:
-        encoded = tokenizer(text, return_tensors="pt", truncation=True)
-        encoded = {k: v.to(device) for k, v in encoded.items()}
+    for row in row_iter:
+        input_ids, labels = build_conditional_ppl_example(
+            tokenizer,
+            prompt=row["prompt"],
+            gold_target=row["gold_target"],
+            max_length=max_length,
+        )
+        if not target_token_count(labels):
+            continue
+        encoded = {
+            "input_ids": torch.tensor([input_ids], dtype=torch.long, device=device),
+            "attention_mask": torch.tensor([[1] * len(input_ids)], dtype=torch.long, device=device),
+        }
+        label_tensor = torch.tensor([labels], dtype=torch.long, device=device)
         with torch.no_grad():
-            outputs = model(**encoded, labels=encoded["input_ids"])
-        losses.append(float(outputs.loss.item()))
-    return float(math.exp(sum(losses) / len(losses)))
+            outputs = model(**encoded)
+        sample_nll, sample_supervised_tokens = _accumulate_shifted_nll(outputs.logits, label_tensor)
+        total_nll += sample_nll
+        total_supervised_tokens += sample_supervised_tokens
+    if total_supervised_tokens == 0:
+        raise ValueError("Perplexity scoring requires at least one supervised target token")
+    return float(math.exp(total_nll / total_supervised_tokens))
 
 
 def compute_weighted_kappa(first_rater_scores: list[int], second_rater_scores: list[int] | None) -> float | None:
@@ -146,9 +219,29 @@ def evaluate_generated_rows(
         )
     )
     if model is not None and tokenizer is not None:
-        texts = [f"{row['prompt']}\n\n[TARGET]\n{row['gold_target']}" for row in rows]
-        metrics["perplexity"] = float(perplexity_fn(model, tokenizer, texts))
+        metrics["perplexity"] = float(perplexity_fn(model, tokenizer, rows))
     return metrics
+
+
+def summarise_seed_metrics(metrics_by_seed: list[dict[str, float]]) -> dict[str, float]:
+    if not metrics_by_seed:
+        raise ValueError("metrics_by_seed must not be empty")
+
+    summary: dict[str, float] = {}
+    metric_keys = list(metrics_by_seed[0].keys())
+    for key in metric_keys:
+        values = [float(metrics[key]) for metrics in metrics_by_seed]
+        summary[f"{key}_mean"] = sum(values) / len(values)
+        if key in GENERATION_METRIC_KEYS:
+            summary[f"{key}_std"] = float(statistics.pstdev(values)) if len(values) > 1 else 0.0
+    return summary
+
+
+def target_token_count(labels: list[int] | object) -> int:
+    try:
+        return int(sum(1 for label in labels if label != -100))
+    except TypeError:
+        return 0
 
 
 def write_metrics_csv(metrics: dict[str, float], output_path: Path) -> None:

@@ -17,6 +17,5 @@ learning_rate: 5.0e-5
 logging_steps: 10
 save_steps: 50
 warmup_steps: 20
-selection_metric: perplexity
 use_retrieval: false
 top_k: 0

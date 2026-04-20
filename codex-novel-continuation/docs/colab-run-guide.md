@@ -4,7 +4,7 @@ This guide is the main Colab execution path for the updated proposal-aligned pro
 
 ## Goal
 
-Run the main E1-E5 experiment line in Google Colab, then export automatic and human-evaluation outputs.
+Run the main E1-E5 experiment line in Google Colab, use the shared 3-seed evaluation CLI, and keep human evaluation as an optional appendix step.
 
 ## Main Sequence
 
@@ -12,10 +12,10 @@ Run the main E1-E5 experiment line in Google Colab, then export automatic and hu
 2. download raw Sherlock Holmes texts
 3. build processed continuation datasets
 4. inspect token budgets
-5. run E1-E5
-6. generate held-out samples
-7. compute automatic metrics
-8. export human-eval CSV
+5. run E1-E5 plus the E5 `aux_weight=0.2` companion run
+6. run 3-seed held-out generation and automatic metrics
+7. compare E5 variants using validation main loss
+8. optionally export human-eval CSV
 9. optionally run retrieval as appendix
 
 ## Setup
@@ -67,6 +67,7 @@ If `k=4` experiments show heavy truncation under `max_length=512`, update those 
 | E3 | `configs/e3_distilgpt2_structured_long_context.yaml` |
 | E4 | `configs/e4_distilgpt2_structured_lora.yaml` |
 | E5 | `configs/e5_distilgpt2_structured_aux_ranking.yaml` |
+| E5-wide | `configs/e5_distilgpt2_structured_aux_ranking_wide.yaml` |
 
 Interpretation rule:
 
@@ -80,45 +81,58 @@ Interpretation rule:
 Run the configs one by one:
 
 ```python
-!python scripts/train_experiment.py --config configs/e1_distilgpt2_plain_full.yaml
-!python scripts/train_experiment.py --config configs/e2_distilgpt2_structured_full.yaml
-!python scripts/train_experiment.py --config configs/e3_distilgpt2_structured_long_context.yaml
-!python scripts/train_experiment.py --config configs/e4_distilgpt2_structured_lora.yaml
-!python scripts/train_experiment.py --config configs/e5_distilgpt2_structured_aux_ranking.yaml
+!python scripts/train_experiment.py --config configs/e1_distilgpt2_plain_full.yaml --seed 42
+!python scripts/train_experiment.py --config configs/e2_distilgpt2_structured_full.yaml --seed 42
+!python scripts/train_experiment.py --config configs/e3_distilgpt2_structured_long_context.yaml --seed 42
+!python scripts/train_experiment.py --config configs/e4_distilgpt2_structured_lora.yaml --seed 42
+!python scripts/train_experiment.py --config configs/e5_distilgpt2_structured_aux_ranking.yaml --seed 42
+!python scripts/train_experiment.py --config configs/e5_distilgpt2_structured_aux_ranking_wide.yaml --seed 42
 ```
 
 Start with E1 as a smoke test before launching the rest.
 
-## Generate Samples
+## Run 3-Seed Automatic Evaluation
 
 Example for E3:
 
 ```python
-!python scripts/generate_samples.py \
+!python scripts/run_eval_3seed.py \
+  --experiment-id e3 \
   --model-dir artifacts/e3_long_context \
-  --output-path artifacts/eval/generated_samples_e3.jsonl
+  --output-dir artifacts/eval
 ```
 
-Repeat for E1-E5 so each experiment has its own sample file.
+Repeat for E1-E5 and the E5-wide run. Each evaluation writes:
 
-## Run Automatic Evaluation
+- `generated_samples_<exp>_seed13.jsonl`
+- `generated_samples_<exp>_seed42.jsonl`
+- `generated_samples_<exp>_seed2026.jsonl`
+- `metrics_<exp>_seed13.csv`
+- `metrics_<exp>_seed42.csv`
+- `metrics_<exp>_seed2026.csv`
+- `metrics_<exp>_summary.csv`
 
-Example for E3:
+Summary CSV columns should include:
 
-```python
-!python scripts/run_auto_eval.py \
-  --model-dir artifacts/e3_long_context \
-  --generated-path artifacts/eval/generated_samples_e3.jsonl \
-  --output-path artifacts/eval/metrics_e3.csv
-```
+- `num_samples_mean`
+- `perplexity_mean`
+- `bertscore_f1_mean`
+- `bertscore_f1_std`
+- `rouge_l_mean`
+- `rouge_l_std`
+- `entity_overlap_mean`
+- `entity_overlap_std`
 
-Each output CSV should contain:
+`perplexity` is deterministic for a fixed checkpoint, so the summary keeps its mean only; sampling variance is reported only for generation-based metrics.
 
-- `num_samples`
-- `perplexity`
-- `bertscore_f1`
-- `rouge_l`
-- `entity_overlap`
+## Select the Final E5 Variant
+
+Compare `artifacts/e5_aux_ranking/training_config.json` and `artifacts/e5_aux_ranking_wide/training_config.json`.
+
+Use `metadata.validation.validation_main_loss` as the selection rule.
+
+- If one run is clearly lower, keep that run as the final E5.
+- If the gap is smaller than about 1%, keep both in the results table as a robustness check.
 
 ## Export Human Evaluation
 
@@ -150,6 +164,8 @@ Retrieval is no longer part of the main experiment line, but you can still run i
 - `artifacts/e3_long_context/`
 - `artifacts/e4_lora/`
 - `artifacts/e5_aux_ranking/`
-- `artifacts/eval/generated_samples_*.jsonl`
-- `artifacts/eval/metrics_*.csv`
-- `artifacts/eval/human_eval_*.csv`
+- `artifacts/e5_aux_ranking_wide/`
+- `artifacts/eval/generated_samples_*_seed*.jsonl`
+- `artifacts/eval/metrics_*_seed*.csv`
+- `artifacts/eval/metrics_*_summary.csv`
+- `artifacts/eval/human_eval_*.csv` if you choose to run the appendix human-eval step

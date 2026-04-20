@@ -17,9 +17,11 @@ from novel_continuation.training import load_training_config, train_baseline_mod
 def main() -> None:
     parser = argparse.ArgumentParser(description="Train a continuation experiment defined by a config file.")
     parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
 
     config = load_training_config(args.config)
+    config["seed"] = args.seed
     if config.get("use_retrieval", False):
         train_retrieval_model(config)
     else:

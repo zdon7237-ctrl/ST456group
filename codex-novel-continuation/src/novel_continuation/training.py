@@ -10,6 +10,7 @@ from typing import Any
 
 import yaml
 
+from novel_continuation.evaluation import compute_perplexity
 from novel_continuation.prompting import build_prompt, build_training_text
 from novel_continuation.retrieval import fit_tfidf_retriever, query_tfidf_index
 from novel_continuation.trainer_runtime import ContinuationDataCollator, compute_candidate_scores
@@ -24,11 +25,11 @@ DEFAULT_TRAINING_CONFIG = {
     "aux_weight": 0.1,
     "max_target_tokens": "auto",
     "num_negative_candidates": 3,
-    "selection_metric": "perplexity",
     "use_retrieval": False,
     "top_k": 0,
     "warmup_steps": 0,
     "max_grad_norm": 1.0,
+    "seed": 42,
 }
 VALID_CONTEXT_FORMATS = {"plain", "structured"}
 VALID_TRAINING_MODES = {"full", "lora"}
@@ -150,6 +151,11 @@ def load_jsonl_records(dataset_path: Path) -> list[dict]:
 
 def validate_main_config(config: dict) -> None:
     config = _normalise_config(config)
+    if "selection_metric" in config:
+        raise ValueError(
+            "The `selection_metric` config key is no longer supported. "
+            "Checkpoint selection is fixed to masked eval_loss."
+        )
     if config["context_format"] not in VALID_CONTEXT_FORMATS:
         raise ValueError(f"context_format must be one of {sorted(VALID_CONTEXT_FORMATS)}")
     if config["training_mode"] not in VALID_TRAINING_MODES:
@@ -525,6 +531,7 @@ def _build_hf_trainer(config: dict, prepared_train: list[dict], prepared_eval: l
         gradient_accumulation_steps=int(config["gradient_accumulation_steps"]),
         num_train_epochs=float(config["num_train_epochs"]),
         learning_rate=float(config["learning_rate"]),
+        seed=int(config.get("seed", 42)),
         logging_steps=int(config["logging_steps"]),
         save_steps=int(config["save_steps"]),
         warmup_steps=int(config.get("warmup_steps", 0)),
@@ -574,6 +581,9 @@ def build_continuation_trainer(config: dict, *, use_retrieval: bool):
     else:
         validate_baseline_config(config)
 
+    from transformers import set_seed
+
+    set_seed(int(config.get("seed", 42)))
     model, tokenizer = load_model_and_tokenizer(config["model_name"])
     model = apply_training_mode(model, config)
     train_records = load_jsonl_records(Path(config["train_path"]))
@@ -641,9 +651,49 @@ def create_retrieval_trainer(config: dict):
     return trainer, tokenizer, resolved_config, metadata
 
 
+def build_eval_rows_from_prepared_records(records: list[dict]) -> list[dict[str, str]]:
+    eval_rows: list[dict[str, str]] = []
+    for record in records:
+        prompt = build_prompt(
+            context=record["context"],
+            retrieved=record.get("retrieved", []),
+            include_retrieval=record.get("include_retrieval", False),
+            context_format=record.get("context_format", "plain"),
+        )
+        eval_rows.append(
+            {
+                "prompt": prompt,
+                "gold_target": record["target"],
+                "generated_text": record["target"],
+            }
+        )
+    return eval_rows
+
+
+def evaluate_validation_main_metrics(trainer, tokenizer) -> dict[str, float]:
+    eval_records = list(getattr(trainer.eval_dataset, "rows", []))
+    eval_rows = build_eval_rows_from_prepared_records(eval_records)
+
+    original_aux_objective = trainer.aux_objective
+    original_collator_aux = trainer.data_collator.aux_objective
+    trainer.aux_objective = "none"
+    trainer.data_collator.aux_objective = "none"
+    try:
+        validation_metrics = trainer.evaluate(metric_key_prefix="validation_main")
+    finally:
+        trainer.aux_objective = original_aux_objective
+        trainer.data_collator.aux_objective = original_collator_aux
+
+    return {
+        "validation_main_loss": float(validation_metrics["validation_main_loss"]),
+        "validation_perplexity": float(compute_perplexity(trainer.model, tokenizer, eval_rows)),
+    }
+
+
 def train_baseline_model(config: dict) -> tuple[object, object]:
     trainer, tokenizer, resolved_config, metadata = create_trainer(config)
     trainer.train()
+    metadata["validation"] = evaluate_validation_main_metrics(trainer, tokenizer)
     trainer.save_model(resolved_config["output_dir"])
     tokenizer.save_pretrained(resolved_config["output_dir"])
     save_training_metadata(resolved_config["output_dir"], resolved_config, metadata)
@@ -653,6 +703,7 @@ def train_baseline_model(config: dict) -> tuple[object, object]:
 def train_retrieval_model(config: dict) -> tuple[object, object]:
     trainer, tokenizer, resolved_config, metadata = create_retrieval_trainer(config)
     trainer.train()
+    metadata["validation"] = evaluate_validation_main_metrics(trainer, tokenizer)
     trainer.save_model(resolved_config["output_dir"])
     tokenizer.save_pretrained(resolved_config["output_dir"])
     save_training_metadata(resolved_config["output_dir"], resolved_config, metadata)
