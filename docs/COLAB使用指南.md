@@ -104,8 +104,8 @@
 
 1. 先看第一格参数区
 2. 按需要修改：
-   - `QUICK_VALIDATION`（快速验证模式，默认开启）
-   - `USE_GOOGLE_DRIVE`
+   - `QUICK_VALIDATION`（当前默认开启）
+   - `USE_GOOGLE_DRIVE`（当前默认开启）
    - `RUN_FULL_MAINLINE`
    - `RUN_APPENDIX_RETRIEVAL`
    - `DOWNLOAD_RESULTS_ZIP`
@@ -156,6 +156,7 @@ notebook 会自动：
 
 第一次建议这样设置：
 
+- `USE_GOOGLE_DRIVE = True`
 - `QUICK_VALIDATION = True`
 - `RUN_FULL_MAINLINE = True`
 - `RUN_APPENDIX_RETRIEVAL = False`
@@ -168,10 +169,16 @@ notebook 会自动：
 
 这样可以在几分钟内跑通 E1-E5 全流程，确认代码和环境没有问题。
 
+当前 notebook 默认就是这组更稳妥的设置：
+
+- `USE_GOOGLE_DRIVE = True`
+- `QUICK_VALIDATION = True`
+
 ### 正式实验设置
 
 确认快速验证通过后，改为：
 
+- `USE_GOOGLE_DRIVE = True`
 - `QUICK_VALIDATION = False`
 - `RUN_FULL_MAINLINE = True`
 
@@ -198,6 +205,8 @@ notebook 会自动：
 如果你担心 Colab 断线后结果丢失，建议：
 
 - `USE_GOOGLE_DRIVE = True`
+
+这样 notebook 会把工作目录放到 Drive 工作区里，`artifacts/` 也会跟着落到 Drive，不会跟 `/content` 一起丢。
 
 否则可以先用 Colab 临时目录快速试跑。
 
@@ -263,7 +272,40 @@ python codex-novel-continuation/scripts/compare_aux_weight.py \
 - 打开 `USE_GOOGLE_DRIVE = True`
 - 或者启用 `DOWNLOAD_RESULTS_ZIP = True`
 
-### 5. retrieval 为什么没有放进主线
+### 5. Colab 断线以后怎么继续
+
+推荐按下面顺序恢复：
+
+1. 重新打开 notebook，并确认第一格参数仍然是：
+   - `USE_GOOGLE_DRIVE = True`
+   - `QUICK_VALIDATION` 按你当前阶段决定是否保留为 `True`
+2. 重新运行前面的环境准备格，至少做到：
+   - 挂载 Drive
+   - 上传 zip
+   - 解压并重新进入 `codex-novel-continuation/`
+   - 安装依赖
+3. 先检查 Drive 工作区里已有的输出目录，例如：
+   - `artifacts/e1_plain_full/`
+   - `artifacts/eval/`
+4. 不要盲目再次点 `Run all`。
+   - 如果前面某些实验已经训练完成，优先从未完成的步骤继续。
+   - 当前 notebook 没有“训练中断后自动从半截 checkpoint 接着跑”的默认流程，所以不要把整段训练 cell 从头再跑一遍。
+5. 如果只是评测阶段断了，可以直接对未完成实验重新运行 `run_eval_3seed.py`，并加：
+   - `--skip-existing`
+
+例如：
+
+```bash
+python scripts/run_eval_3seed.py \
+  --experiment-id e3 \
+  --model-dir artifacts/e3_long_context \
+  --output-dir artifacts/eval \
+  --skip-existing
+```
+
+这时脚本会复用 Drive 里已经存在的 seed 结果，只补缺失的部分并重写 summary。
+
+### 6. retrieval 为什么没有放进主线
 
 因为现在新版 proposal 的主线是：
 
@@ -281,7 +323,7 @@ retrieval 只保留为 appendix / optional ablation。
 
 1. 先跑 notebook 默认 smoke
 2. 检查 E1 是否完整产出
-3. 再把 `RUN_FULL_MAINLINE` 打开
+3. 再把 `QUICK_VALIDATION` 改成 `False`
 4. 跑 E2-E5
 5. 最后再决定要不要跑 retrieval appendix
 
