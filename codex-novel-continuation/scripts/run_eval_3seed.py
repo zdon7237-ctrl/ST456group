@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import csv
 from pathlib import Path
 import sys
 
@@ -25,6 +26,17 @@ DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "artifacts" / "eval"
 DEFAULT_SEEDS = (13, 42, 2026)
 
 
+def load_metrics_csv(path: Path) -> dict[str, float]:
+    if not path.exists():
+        raise FileNotFoundError(f"Metrics CSV not found: {path}")
+    with path.open("r", encoding="utf-8", newline="") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+    if len(rows) != 1:
+        raise ValueError(f"Expected exactly one metrics row in {path}, found {len(rows)}")
+    return {key: float(value) for key, value in rows[0].items()}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run generation and automatic evaluation over multiple fixed seeds.")
     parser.add_argument("--experiment-id", required=True, help="Short experiment identifier such as e1, e3, or e5_w02.")
@@ -42,6 +54,7 @@ def main() -> None:
     parser.add_argument("--use-retrieval", action="store_true")
     parser.add_argument("--context-format", choices=["plain", "structured"], default=None)
     parser.add_argument("--seeds", nargs="+", type=int, default=list(DEFAULT_SEEDS))
+    parser.add_argument("--skip-existing", action="store_true", help="Reuse per-seed outputs that already exist and only fill missing pieces.")
     args = parser.parse_args()
 
     rows = load_jsonl(args.input_path)
@@ -50,10 +63,32 @@ def main() -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     experiment_id = args.experiment_id.lower()
 
-    model, tokenizer = load_trained_model_and_tokenizer(args.model_dir)
     metrics_by_seed: list[dict[str, float]] = []
+    model = None
+    tokenizer = None
+
+    def ensure_model_loaded():
+        nonlocal model, tokenizer
+        if model is None or tokenizer is None:
+            model, tokenizer = load_trained_model_and_tokenizer(args.model_dir)
+        return model, tokenizer
 
     for seed in args.seeds:
+        generated_path = output_dir / f"generated_samples_{experiment_id}_seed{seed}.jsonl"
+        metrics_path = output_dir / f"metrics_{experiment_id}_seed{seed}.csv"
+        if args.skip_existing and generated_path.exists() and metrics_path.exists():
+            metrics_by_seed.append(load_metrics_csv(metrics_path))
+            continue
+
+        if args.skip_existing and generated_path.exists() and not metrics_path.exists():
+            seed_model, seed_tokenizer = ensure_model_loaded()
+            generated = load_jsonl(generated_path)
+            metrics = evaluate_generated_rows(generated, model=seed_model, tokenizer=seed_tokenizer)
+            write_metrics_csv(metrics, metrics_path)
+            metrics_by_seed.append(metrics)
+            continue
+
+        seed_model, seed_tokenizer = ensure_model_loaded()
         generated = generate_rows(
             rows=rows,
             model_dir=args.model_dir,
@@ -66,13 +101,11 @@ def main() -> None:
             top_p=args.top_p,
             temperature=args.temperature,
             seed=seed,
-            model=model,
-            tokenizer=tokenizer,
+            model=seed_model,
+            tokenizer=seed_tokenizer,
         )
-        generated_path = output_dir / f"generated_samples_{experiment_id}_seed{seed}.jsonl"
-        metrics_path = output_dir / f"metrics_{experiment_id}_seed{seed}.csv"
         write_jsonl(generated, generated_path)
-        metrics = evaluate_generated_rows(generated, model=model, tokenizer=tokenizer)
+        metrics = evaluate_generated_rows(generated, model=seed_model, tokenizer=seed_tokenizer)
         write_metrics_csv(metrics, metrics_path)
         metrics_by_seed.append(metrics)
 

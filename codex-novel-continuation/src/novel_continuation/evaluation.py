@@ -8,7 +8,11 @@ import re
 import statistics
 from pathlib import Path
 
-from novel_continuation.trainer_runtime import TARGET_SECTION_PREFIX, encode_target_with_prefix
+from novel_continuation.trainer_runtime import (
+    TARGET_SECTION_DELIMITER,
+    TARGET_SECTION_PREFIX,
+    encode_target_with_prefix,
+)
 
 
 ENTITY_PATTERN = re.compile(r"\b[A-Z][a-z]+(?:\s+[A-Z][a-z]+)*\b")
@@ -95,7 +99,7 @@ def build_conditional_ppl_example(
     gold_target: str,
     max_length: int,
 ) -> tuple[list[int], list[int]]:
-    delimiter_ids = tokenizer("\n\n", add_special_tokens=False)["input_ids"]
+    delimiter_ids = tokenizer(TARGET_SECTION_DELIMITER, add_special_tokens=False)["input_ids"]
     prompt_ids = tokenizer(prompt, add_special_tokens=False)["input_ids"]
     prefix_only_ids = tokenizer(TARGET_SECTION_PREFIX, add_special_tokens=False)["input_ids"]
     max_target_tokens = max(0, max_length - len(delimiter_ids) - len(prefix_only_ids))

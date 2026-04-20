@@ -5,6 +5,7 @@ from __future__ import annotations
 from novel_continuation.prompting import build_prompt
 
 
+TARGET_SECTION_DELIMITER = "\n\n"
 TARGET_SECTION_PREFIX = "[TARGET]\n"
 
 
@@ -81,7 +82,7 @@ class ContinuationDataCollator:
         self.max_target_tokens = max_target_tokens
         self.aux_objective = aux_objective
         self.pad_token_id = tokenizer.pad_token_id
-        self.delimiter_ids = tokenizer("\n\n", add_special_tokens=False)["input_ids"]
+        self.delimiter_ids = tokenizer(TARGET_SECTION_DELIMITER, add_special_tokens=False)["input_ids"]
 
     def _encode_target_section(self, target: str) -> tuple[list[int], list[int]]:
         return encode_target_with_prefix(

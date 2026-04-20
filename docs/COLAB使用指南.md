@@ -55,7 +55,7 @@
 
 - `distilgpt2`、LoRA、自动评估这些步骤更适合在 Colab GPU 上跑
 - 项目现在已经按 Colab-first 方式整理过
-- 主线实验 E1-E5、自动评估和人评导出都已经有脚本入口
+- 主线实验 E1-E5 和自动评估都已经有脚本入口；人评导出保留为 deferred optional 流程
 - 本地不需要先把环境完全配好，也能推进主要实验
 
 ---
@@ -218,7 +218,15 @@ notebook 会自动：
 - `artifacts/eval/metrics_*_summary.csv`
 - `artifacts/eval/human_eval_*.csv`（如果你手动开启可选的人评导出）
 
-如果你同时跑了 E5 的两个 `aux_weight` 版本，应优先比较各自 `training_config.json` 中的 `metadata.validation.validation_main_loss`，再决定最终把哪一个 E5 放进主结果表。
+如果你同时跑了 E5 的两个 `aux_weight` 版本，建议直接运行：
+
+```bash
+python codex-novel-continuation/scripts/compare_aux_weight.py \
+  codex-novel-continuation/artifacts/e5_aux_ranking \
+  codex-novel-continuation/artifacts/e5_aux_ranking_wide
+```
+
+再按输出里的 `validation_main_loss` 结论决定最终把哪一个 E5 放进主结果表。
 
 如果开启下载打包，notebook 还会生成：
 

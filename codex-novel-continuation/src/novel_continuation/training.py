@@ -13,7 +13,12 @@ import yaml
 from novel_continuation.evaluation import compute_perplexity
 from novel_continuation.prompting import build_prompt, build_training_text
 from novel_continuation.retrieval import fit_tfidf_retriever, query_tfidf_index
-from novel_continuation.trainer_runtime import ContinuationDataCollator, compute_candidate_scores
+from novel_continuation.trainer_runtime import (
+    TARGET_SECTION_DELIMITER,
+    ContinuationDataCollator,
+    compute_candidate_scores,
+    encode_target_with_prefix,
+)
 
 
 PATH_KEYS = ("train_path", "eval_path", "output_dir")
@@ -212,6 +217,16 @@ def resolve_max_target_tokens(config: dict, train_records: list[dict], tokenizer
     return choose_max_target_tokens(_target_token_lengths(train_records, tokenizer))
 
 
+def _estimate_serialised_target_section_length(tokenizer, target: str, max_target_tokens: int) -> int:
+    delimiter_ids = tokenizer(TARGET_SECTION_DELIMITER, add_special_tokens=False)["input_ids"]
+    target_prefix_ids, target_body_ids = encode_target_with_prefix(
+        tokenizer,
+        target,
+        max_target_tokens=max_target_tokens,
+    )
+    return len(delimiter_ids) + len(target_prefix_ids) + len(target_body_ids)
+
+
 def summarise_token_budget(
     records: list[dict],
     tokenizer,
@@ -233,11 +248,12 @@ def summarise_token_budget(
             context_format=context_format,
         )
         prompt_tokens = len(tokenizer(prompt_text, add_special_tokens=False)["input_ids"])
-        target_tokens = min(
-            len(tokenizer(record["target"], add_special_tokens=False)["input_ids"]),
-            max_target_tokens,
+        target_section_tokens = _estimate_serialised_target_section_length(
+            tokenizer,
+            record["target"],
+            max_target_tokens=max_target_tokens,
         )
-        total_length = prompt_tokens + target_tokens
+        total_length = prompt_tokens + target_section_tokens
         total_lengths.append(total_length)
         if total_length > max_length:
             truncated_count += 1
@@ -664,6 +680,8 @@ def build_eval_rows_from_prepared_records(records: list[dict]) -> list[dict[str,
             {
                 "prompt": prompt,
                 "gold_target": record["target"],
+                # Keep the generated_text key for shared evaluation-row compatibility.
+                # Validation PPL is computed from prompt + gold_target and does not read this field.
                 "generated_text": record["target"],
             }
         )

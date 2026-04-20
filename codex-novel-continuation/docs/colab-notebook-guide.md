@@ -85,16 +85,19 @@ Copy each block into a separate Colab cell.
 
 `metrics_*_summary.csv` reports means for all metrics, but standard deviation only for generation-based metrics. `perplexity` is deterministic for a fixed checkpoint, so it keeps a mean/single-value interpretation only.
 
+If a Colab session disconnects, rerun the same command with `--skip-existing` to reuse completed seeds and rebuild the summary.
+
 ## Cell 13: Compare E5 variants with validation main loss
 
 ```python
-!cat artifacts/e5_aux_ranking/training_config.json
-!cat artifacts/e5_aux_ranking_wide/training_config.json
+!python scripts/compare_aux_weight.py \
+  artifacts/e5_aux_ranking \
+  artifacts/e5_aux_ranking_wide
 ```
 
 Use `metadata.validation.validation_main_loss` to choose the final E5 variant.
 
-## Cell 14: Optional human-eval CSV export
+## Cell 14: Deferred / optional human-eval CSV export
 
 ```python
 !python scripts/prepare_human_eval.py \
@@ -103,7 +106,9 @@ Use `metadata.validation.validation_main_loss` to choose the final E5 variant.
   --system-label "System E3"
 ```
 
-## Cell 15: Open the rubric
+This step is not part of the default main evaluation pipeline.
+
+## Cell 15: Open the deferred rubric
 
 ```python
 !cat docs/human-eval-rubric.md

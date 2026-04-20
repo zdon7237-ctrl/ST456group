@@ -4,7 +4,7 @@ This guide is the main Colab execution path for the updated proposal-aligned pro
 
 ## Goal
 
-Run the main E1-E5 experiment line in Google Colab, use the shared 3-seed evaluation CLI, and keep human evaluation as an optional appendix step.
+Run the main E1-E5 experiment line in Google Colab, use the shared 3-seed evaluation CLI, and treat human evaluation as a deferred optional appendix.
 
 ## Main Sequence
 
@@ -15,7 +15,7 @@ Run the main E1-E5 experiment line in Google Colab, use the shared 3-seed evalua
 5. run E1-E5 plus the E5 `aux_weight=0.2` companion run
 6. run 3-seed held-out generation and automatic metrics
 7. compare E5 variants using validation main loss
-8. optionally export human-eval CSV
+8. optionally export a deferred human-eval CSV appendix
 9. optionally run retrieval as appendix
 
 ## Setup
@@ -125,27 +125,41 @@ Summary CSV columns should include:
 
 `perplexity` is deterministic for a fixed checkpoint, so the summary keeps its mean only; sampling variance is reported only for generation-based metrics.
 
+If a Colab session drops midway through evaluation, rerun with `--skip-existing` to reuse completed seeds:
+
+```python
+!python scripts/run_eval_3seed.py \
+  --experiment-id e3 \
+  --model-dir artifacts/e3_long_context \
+  --output-dir artifacts/eval \
+  --skip-existing
+```
+
 ## Select the Final E5 Variant
 
-Compare `artifacts/e5_aux_ranking/training_config.json` and `artifacts/e5_aux_ranking_wide/training_config.json`.
+Use `metadata.validation.validation_main_loss` as the selection rule:
 
-Use `metadata.validation.validation_main_loss` as the selection rule.
+```python
+!python scripts/compare_aux_weight.py \
+  artifacts/e5_aux_ranking \
+  artifacts/e5_aux_ranking_wide
+```
 
 - If one run is clearly lower, keep that run as the final E5.
 - If the gap is smaller than about 1%, keep both in the results table as a robustness check.
 
-## Export Human Evaluation
+## Deferred / Optional Human Evaluation
 
 Example for E3:
 
 ```python
 !python scripts/prepare_human_eval.py \
-  --input-path artifacts/eval/generated_samples_e3.jsonl \
+  --input-path artifacts/eval/generated_samples_e3_seed13.jsonl \
   --output-path artifacts/eval/human_eval_e3.csv \
   --system-label "System E3"
 ```
 
-Use the rubric in `docs/human-eval-rubric.md`.
+Use the rubric in `docs/human-eval-rubric.md` only if you later decide to add a human-evaluation appendix. It is not part of the default mainline pipeline.
 
 ## Appendix Experiment
 

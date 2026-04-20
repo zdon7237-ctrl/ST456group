@@ -14,6 +14,7 @@ if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
 from novel_continuation.prompting import build_prompt
+from novel_continuation.trainer_runtime import TARGET_SECTION_DELIMITER, TARGET_SECTION_PREFIX
 from novel_continuation.training import attach_retrieval, load_trained_model_and_tokenizer, select_context_window
 
 DEFAULT_INPUT_PATH = PROJECT_ROOT / "data" / "processed" / "test.jsonl"
@@ -138,7 +139,7 @@ def generate_rows(
             include_retrieval=use_retrieval,
             context_format=resolved_context_format,
         )
-        inference_prompt = f"{prompt}\n\n[TARGET]\n"
+        inference_prompt = f"{prompt}{TARGET_SECTION_DELIMITER}{TARGET_SECTION_PREFIX}"
         max_positions = getattr(model.config, "n_positions", 1024)
         max_input_len = max_positions - max_new_tokens
         if max_input_len < 1:

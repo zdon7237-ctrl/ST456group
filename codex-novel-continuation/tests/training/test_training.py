@@ -5,6 +5,7 @@ import types
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
+from novel_continuation.prompting import build_prompt
 from novel_continuation.trainer_runtime import TARGET_SECTION_PREFIX, ContinuationDataCollator, encode_target_with_prefix
 from novel_continuation.training import (
     attach_retrieval,
@@ -15,6 +16,7 @@ from novel_continuation.training import (
     load_training_config,
     prepare_training_records,
     select_negative_candidates,
+    summarise_token_budget,
     validate_baseline_config,
 )
 
@@ -377,6 +379,37 @@ def test_build_eval_rows_from_prepared_records_uses_prompt_builder_contract():
     assert "[PARAGRAPH 1]" in rows[0]["prompt"]
     assert "[RETRIEVED]" in rows[0]["prompt"]
     assert rows[0]["generated_text"] == "p3"
+
+
+def test_summarise_token_budget_counts_delimiter_and_target_prefix():
+    tokenizer = _CharTokenizer()
+    record = {"context": ["Holmes spoke."], "target": "Watson replied."}
+    prompt = build_prompt(
+        context=record["context"],
+        retrieved=[],
+        include_retrieval=False,
+        context_format="plain",
+    )
+    expected_total = (
+        len(tokenizer(prompt, add_special_tokens=False)["input_ids"])
+        + len(tokenizer("\n\n", add_special_tokens=False)["input_ids"])
+        + len(tokenizer(TARGET_SECTION_PREFIX, add_special_tokens=False)["input_ids"])
+        + len(tokenizer(record["target"], add_special_tokens=False)["input_ids"])
+    )
+
+    summary = summarise_token_budget(
+        [record],
+        tokenizer,
+        context_format="plain",
+        use_retrieval=False,
+        max_target_tokens=128,
+        max_length=expected_total - 1,
+        context_size=1,
+    )
+
+    assert summary["avg_total_tokens"] == expected_total
+    assert summary["max_total_tokens"] == float(expected_total)
+    assert summary["truncation_rate"] == 1.0
 
 
 def test_prepare_training_records_with_retrieval_uses_only_prior_candidates():
@@ -787,3 +820,134 @@ def test_run_eval_3seed_writes_per_seed_outputs_and_summary(tmp_path, monkeypatc
     assert "perplexity_mean" in summary_metrics
     assert "perplexity_std" not in summary_metrics
     assert "rouge_l_std" in summary_metrics
+
+
+def test_run_eval_3seed_skip_existing_reuses_metrics_and_backfills_missing_metrics(tmp_path, monkeypatch):
+    script_path = Path(__file__).resolve().parents[2] / "scripts" / "run_eval_3seed.py"
+    spec = importlib.util.spec_from_file_location("run_eval_3seed", script_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError("Expected run_eval_3seed.py to be importable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    model_dir = tmp_path / "model"
+    model_dir.mkdir()
+    output_dir = tmp_path / "eval"
+    output_dir.mkdir()
+    input_path = tmp_path / "test.jsonl"
+    input_path.write_text("[]", encoding="utf-8")
+
+    generated_13 = output_dir / "generated_samples_e3_seed13.jsonl"
+    generated_13.write_text(
+        '{"prompt": "[CONTEXT]\\nc1", "gold_target": "t1", "generated_text": "g-13"}\n',
+        encoding="utf-8",
+    )
+    metrics_13 = output_dir / "metrics_e3_seed13.csv"
+    metrics_13.write_text(
+        "num_samples,perplexity,rouge_l,bertscore_f1,entity_overlap\n"
+        "1.0,3.0,0.1,0.2,0.3\n",
+        encoding="utf-8",
+    )
+    generated_42 = output_dir / "generated_samples_e3_seed42.jsonl"
+    generated_42.write_text(
+        '{"prompt": "[CONTEXT]\\nc1", "gold_target": "t1", "generated_text": "g-42"}\n',
+        encoding="utf-8",
+    )
+
+    observed = {"model_loads": 0, "metrics_writes": []}
+
+    def fake_load_jsonl(path):
+        if Path(path) == input_path:
+            return [{"context": ["c1"], "target": "t1"}]
+        if Path(path) == generated_42:
+            return [{"prompt": "[CONTEXT]\nc1", "gold_target": "t1", "generated_text": "g-42"}]
+        raise AssertionError(f"Unexpected load_jsonl path: {path}")
+
+    monkeypatch.setattr(module, "load_jsonl", fake_load_jsonl)
+
+    def fake_load_model(_path):
+        observed["model_loads"] += 1
+        return "model", "tokenizer"
+
+    monkeypatch.setattr(module, "load_trained_model_and_tokenizer", fake_load_model)
+    monkeypatch.setattr(module, "generate_rows", lambda **_kwargs: (_ for _ in ()).throw(AssertionError("generate_rows should not run")))
+    monkeypatch.setattr(module, "write_jsonl", lambda *_args, **_kwargs: (_ for _ in ()).throw(AssertionError("write_jsonl should not run")))
+    monkeypatch.setattr(
+        module,
+        "evaluate_generated_rows",
+        lambda rows, model=None, tokenizer=None: {
+            "num_samples": 1.0,
+            "perplexity": 3.0,
+            "rouge_l": 0.2,
+            "bertscore_f1": 0.3,
+            "entity_overlap": 0.4,
+        },
+    )
+    monkeypatch.setattr(module, "write_metrics_csv", lambda metrics, path: observed["metrics_writes"].append((metrics, path.name)))
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "run_eval_3seed.py",
+            "--experiment-id",
+            "e3",
+            "--model-dir",
+            str(model_dir),
+            "--input-path",
+            str(input_path),
+            "--output-dir",
+            str(output_dir),
+            "--seeds",
+            "13",
+            "42",
+            "--skip-existing",
+        ],
+    )
+
+    module.main()
+
+    assert observed["model_loads"] == 1
+    assert observed["metrics_writes"][0][1] == "metrics_e3_seed42.csv"
+    summary_metrics = dict(observed["metrics_writes"][-1][0])
+    assert observed["metrics_writes"][-1][1] == "metrics_e3_summary.csv"
+    assert round(summary_metrics["rouge_l_mean"], 6) == 0.15
+    assert "perplexity_std" not in summary_metrics
+
+
+def test_compare_aux_weight_reports_validation_loss_and_recommendation(tmp_path, monkeypatch, capsys):
+    script_path = Path(__file__).resolve().parents[2] / "scripts" / "compare_aux_weight.py"
+    spec = importlib.util.spec_from_file_location("compare_aux_weight", script_path)
+    if spec is None or spec.loader is None:
+        raise AssertionError("Expected compare_aux_weight.py to be importable")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+
+    left_dir = tmp_path / "e5_aux_ranking"
+    left_dir.mkdir()
+    (left_dir / "training_config.json").write_text(
+        '{"metadata": {"validation": {"validation_main_loss": 1.000000, "validation_perplexity": 12.0}}}',
+        encoding="utf-8",
+    )
+    right_config = tmp_path / "training_config_right.json"
+    right_config.write_text(
+        '{"metadata": {"validation": {"validation_main_loss": 1.025000, "validation_perplexity": 12.5}}}',
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "compare_aux_weight.py",
+            str(left_dir),
+            str(right_config),
+        ],
+    )
+
+    module.main()
+
+    output = capsys.readouterr().out
+    assert "left_validation_main_loss: 1.000000" in output
+    assert "right_validation_main_loss: 1.025000" in output
+    assert "selection_rule: validation_main_loss only" in output
+    assert "recommendation: select e5_aux_ranking" in output

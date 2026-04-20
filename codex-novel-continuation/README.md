@@ -36,10 +36,12 @@ The headline automatic metrics are:
 - `bertscore_f1`
 - `rouge_l`
 
+The main evaluation pipeline uses the shared 3-seed generation workflow and reports mean values across seeds.
+
 The project also keeps:
 
 - `entity_overlap` as a diagnostic metric
-- human evaluation focused on contextual coherence, character consistency, and fluency as an optional appendix step
+- Human evaluation is deferred; `prepare_human_eval.py` is retained for future use but is not part of the main evaluation pipeline.
 
 ## Setup
 
@@ -65,7 +67,7 @@ pip install -r requirements.txt
 4. Train E1-E5 plus the E5 `aux_weight=0.2` companion run.
 5. Run 3-seed held-out generation and automatic evaluation.
 6. Compare E5 variants with validation main loss, then report test metrics.
-7. Optionally export human-evaluation sheets.
+7. Human evaluation is deferred; optionally export sheets later if you decide to add an appendix.
 8. Optionally run retrieval as an appendix experiment.
 
 ## Important Scripts
@@ -77,6 +79,7 @@ pip install -r requirements.txt
 - `scripts/generate_samples.py`
 - `scripts/run_auto_eval.py`
 - `scripts/run_eval_3seed.py`
+- `scripts/compare_aux_weight.py`
 - `scripts/prepare_human_eval.py`
 
 ## Important Configs
