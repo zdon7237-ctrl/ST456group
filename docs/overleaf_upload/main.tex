@@ -1,0 +1,268 @@
+\documentclass{article}
+
+% If the ICML 2026 style files are present, use them.
+% Otherwise fall back to a plain article layout so the draft can still compile
+% in Overleaf before the official style bundle is uploaded.
+\newif\ificmlstyle
+\IfFileExists{icml2026.sty}{
+  \icmlstyletrue
+  \usepackage[accepted]{icml2026}
+}{
+  \icmlstylefalse
+  \usepackage[a4paper,margin=1in]{geometry}
+  \usepackage[numbers]{natbib}
+  \newcommand{\icmltitle}[1]{\begin{center}{\LARGE\bfseries #1\par}\vspace{0.5em}}
+  \newenvironment{icmlauthorlist}{\begin{tabular}{c}}{\end{tabular}\end{center}}
+  \newcommand{\icmlauthor}[2]{#1\\}
+  \newcommand{\icmlaffiliation}[2]{}
+  \newcommand{\icmlcorrespondingauthor}[2]{}
+  \newcommand{\icmlkeywords}[1]{}
+  \newcommand{\printAffiliationsAndNotice}[1]{}
+}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{multirow}
+
+\newcommand{\model}{\texttt{distilgpt2}}
+\newcommand{\expid}[1]{\textsc{#1}}
+\newcommand{\traincount}{\textbf{TODO}}
+\newcommand{\valcount}{\textbf{TODO}}
+\newcommand{\testcount}{663}
+
+\begin{document}
+
+\twocolumn[
+\icmltitle{Contextual Coherence in Sherlock Holmes Paragraph Continuation via GPT-2 Fine-Tuning}
+
+\begin{icmlauthorlist}
+\icmlauthor{Student One}{lse}
+\icmlauthor{Student Two}{lse}
+\icmlauthor{Student Three}{lse}
+\icmlauthor{Student Four}{lse}
+\end{icmlauthorlist}
+
+\icmlaffiliation{lse}{Department of Statistics, London School of Economics and Political Science, London, United Kingdom}
+\icmlcorrespondingauthor{Student One}{TODO@example.com}
+\icmlkeywords{paragraph continuation, GPT-2, contextual coherence, language generation}
+
+\vskip 0.3in
+]
+
+\printAffiliationsAndNotice{}
+
+\begin{abstract}
+We study paragraph-level continuation in the Sherlock Holmes narrative world using a controlled series of GPT-2 fine-tuning experiments. Given the first $k$ paragraphs of a passage, the task is to generate the next paragraph while preserving contextual coherence and narrative consistency. Rather than making retrieval or prompt engineering the main contribution, we focus on deep learning design choices: input structure, context length, fine-tuning strategy, and auxiliary training objectives. Using \model{} as a common backbone, we compare five main experiments (\expid{E1}--\expid{E5}) and evaluate them with target-conditioned perplexity, ROUGE-L, BERTScore, and a diagnostic entity-overlap metric under a three-seed generation protocol. The results show that structured input formatting provides only a modest improvement over plain concatenation, while longer structured context with full fine-tuning (\expid{E3}) gives the strongest overall trade-off across validation and test metrics. LoRA fine-tuning (\expid{E4}) performs noticeably worse than full fine-tuning in this setting, and the ranking-based auxiliary objective (\expid{E5}) does not provide a clear improvement over the strongest no-auxiliary baseline. A retrieval appendix is reserved for later ablation analysis.
+\end{abstract}
+
+\section{Introduction}
+
+Maintaining coherence beyond the sentence level remains one of the central difficulties in neural text generation. A model may generate fluent local continuations while still failing at the narrative level by introducing inconsistent facts, weakening character behavior, or drifting away from the current scene. This problem is especially visible in paragraph continuation, where the system must generate the next paragraph conditioned on a short but semantically rich discourse history. In this setting, good performance requires not only grammatical well-formedness but also continuity of plot, setting, and speaker perspective.
+
+The Sherlock Holmes stories provide a useful testbed for this problem. They share a stable narrative world, recurring core characters such as Sherlock Holmes and Dr.\ Watson, and a relatively consistent literary register across books. These properties make the corpus well suited for studying contextual coherence in continuation generation: the model must remain aligned with both recent paragraph-level context and broader story-world regularities, rather than simply producing generic fluent prose.
+
+The present project asks a focused empirical question: which deep learning design choices matter most for paragraph-level continuation quality in this setting? Rather than framing retrieval or prompt engineering as the main contribution, we concentrate on model-facing design decisions: how the context is represented, how much context is provided, whether parameter-efficient adaptation is competitive with full fine-tuning, and whether an auxiliary coherence-related objective improves over standard language-model training. This yields a controlled mainline experiment series in which each comparison isolates a single factor.
+
+The completed mainline is organized around four pairwise comparisons. \expid{E1} versus \expid{E2} tests whether structured paragraph formatting improves over plain concatenation. \expid{E2} versus \expid{E3} tests whether a longer context window improves continuation quality. \expid{E3} versus \expid{E4} compares full fine-tuning with LoRA under the same long-context structured setting. \expid{E3} versus \expid{E5} tests whether adding a ranking-based auxiliary objective improves over the strongest no-auxiliary baseline. An additional \expid{E5W} run is used only as a robustness check for auxiliary-weight selection and does not define a separate mainline claim.
+
+The resulting picture is relatively clear. Structured input provides only a modest gain over plain formatting. Increasing the context window under structured full fine-tuning yields the strongest overall mainline configuration, with \expid{E3} achieving the best validation-side performance and the lowest test perplexity. In contrast, LoRA underperforms full fine-tuning in this task setting, and the ranking-based auxiliary objective does not produce a clear improvement over the strongest no-auxiliary system. Retrieval is reserved for a later appendix-level extension and is not part of the current evidence base.
+
+\section{Related Work}
+
+Our work is most directly situated within the literature on autoregressive transformer language models for conditional text generation. Transformer-based language models have become a standard foundation for continuation tasks because they model left-to-right generation natively and can be adapted efficiently through fine-tuning rather than training from scratch \citep{vaswani2017attention,radford2019language}. GPT-style models are especially relevant in this context because they provide strong baselines for open-ended generation while remaining computationally feasible for controlled small-scale studies.
+
+The report is also related to long-form and story generation research, where coherence remains a central challenge. Prior work has repeatedly shown that locally fluent generations can still fail at the discourse level through topic drift, character inconsistency, or breakdowns in plot continuity \citep{fan2018hierarchical,holtzman2020curious}. This observation motivates our focus on paragraph-level continuation. The task is more constrained than unrestricted story generation, but it still exposes the same core coherence problem and therefore offers a useful middle ground for systematic comparison.
+
+A third relevant line of work concerns parameter-efficient adaptation. Methods such as LoRA are motivated by the observation that pretrained models can often be adapted successfully without updating all parameters \citep{hu2022lora}. This creates a potentially attractive quality-efficiency trade-off, especially when computational resources are limited. Because our mainline includes a direct comparison between full fine-tuning and LoRA, this literature provides the conceptual background for asking whether parameter efficiency remains competitive in a relatively small-model, literary continuation setting.
+
+Finally, our project connects to work on training objectives beyond standard next-token prediction. Token-level language-model loss is often sufficient for fluent generation, but it does not explicitly target discourse-level coherence or continuation plausibility. This has motivated the use of additional objectives such as ranking, contrastive learning, or coherence classification. Our \expid{E5} experiment fits into this line of work by testing whether a simple ranking-based auxiliary signal improves next-paragraph continuation quality beyond the strongest no-auxiliary baseline. Retrieval-related work is acknowledged, but retrieval is not part of the present mainline and is reserved for a later appendix-level extension.
+
+\section{Methodology and Architecture}
+
+\subsection{Task Formulation}
+
+We formulate the task as conditional next-paragraph generation. Each training example consists of a context window of the preceding $k$ paragraphs and a target paragraph taken from the same source text. The model is conditioned on the context and optimized to generate the next paragraph. Although the supervision signal is token-level, the task objective is discourse-level: a successful continuation should remain compatible with the immediately preceding context, preserve the local narrative state, and avoid implausible shifts in scene, speaker behavior, or story direction.
+
+\subsection{Backbone Model}
+
+All mainline experiments use \model{} as the common backbone. The main reason for this choice is experimental control. A small and stable pretrained model is sufficient to expose meaningful differences among context design and training choices while remaining feasible under a Colab-first workflow. By keeping the backbone fixed across the entire \expid{E1}--\expid{E5} line, we ensure that observed differences are primarily attributable to the design factor under study, rather than to changes in model scale or architecture.
+
+\subsection{Input Representation}
+
+The first comparison axis concerns how the context is serialized. In the plain setting, context paragraphs are concatenated in a simple textual form. In the structured setting, the same context is formatted with explicit paragraph markers. The intuition is that explicit discourse boundaries may help the model distinguish paragraph roles more clearly and reduce ambiguity about how local narrative state is organized. This comparison is operationalized through \expid{E1} versus \expid{E2}, which keeps the backbone and training strategy fixed while changing only the context format.
+
+\subsection{Context Window}
+
+The second axis concerns how much prior text is supplied to the model. The short-context setting uses $k=2$ paragraphs, whereas the long-context setting uses $k=4$ paragraphs. This comparison asks whether additional narrative history improves continuation quality by giving the model more information about scene development, character references, and local plot state. The mainline keeps the context format fixed when making this comparison, so that \expid{E2} versus \expid{E3} isolates context length rather than mixing it with another design change.
+
+\subsection{Fine-Tuning Strategy}
+
+The third axis compares full fine-tuning with LoRA. In full fine-tuning, all model parameters are updated on the continuation task. In the LoRA setting, only low-rank adapter parameters are trained while the pretrained backbone remains largely fixed. This comparison is motivated by the possibility that parameter-efficient adaptation may preserve much of the performance of full fine-tuning at lower computational cost. The \expid{E3} versus \expid{E4} comparison tests whether this trade-off remains favorable in a relatively small-model, literary continuation setting.
+
+\subsection{Auxiliary Objective}
+
+The final axis concerns the training objective. The baseline objective is standard causal language-model training on the target continuation. In the auxiliary setting, we add a ranking-based objective that encourages the model to score the true next paragraph above sampled negative candidates. Conceptually, this objective is intended to inject a weak discourse-level preference into training, rather than relying exclusively on token-level likelihood. The \expid{E3} versus \expid{E5} comparison therefore asks whether a simple coherence-oriented auxiliary signal can improve continuation quality beyond the strongest no-auxiliary configuration.
+
+\section{Training Methods and Experimental Setup}
+
+\subsection{Dataset and Preprocessing}
+
+We use four public-domain Sherlock Holmes texts from Project Gutenberg: \textit{The Adventures of Sherlock Holmes}, \textit{The Memoirs of Sherlock Holmes}, \textit{The Hound of the Baskervilles}, and \textit{The Return of Sherlock Holmes}. The preprocessing pipeline removes boilerplate material, segments each book into paragraphs, filters out unsuitable paragraphs, and converts the cleaned corpus into supervised $(context, target)$ continuation examples. Each example consists of the previous $k$ paragraphs and the next paragraph from the same book.
+
+Table~\ref{tab:dataset} is included as a fill-in placeholder for the final submission. The exact train and validation counts should be copied from the processed JSONL files before submission. The completed mainline evaluation uses a full held-out test set of \testcount{} samples, as confirmed by the generated summary metrics.
+
+\begin{table}[t]
+\caption{Dataset split summary. Fill the exact train and validation counts before submission.}
+\label{tab:dataset}
+\centering
+\begin{tabular}{lr}
+\toprule
+Split & Samples \\
+\midrule
+Train & \traincount \\
+Validation & \valcount \\
+Test & \testcount \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Main Experiment Matrix}
+
+The main experiment line is designed to isolate one design factor at a time, as shown in Table~\ref{tab:matrix}.
+
+\begin{table}[t]
+\caption{Main experiment matrix.}
+\label{tab:matrix}
+\centering
+\scriptsize
+\begin{tabular}{lll}
+\toprule
+ID & Goal & Setup \\
+\midrule
+\expid{E1} & Baseline & $k=2$, plain, full, no aux \\
+\expid{E2} & Structure & $k=2$, structured, full, no aux \\
+\expid{E3} & Context length & $k=4$, structured, full, no aux \\
+\expid{E4} & Fine-tuning & $k=4$, structured, LoRA, no aux \\
+\expid{E5} & Objective & $k=4$, structured, full, ranking \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+An additional run, \expid{E5W}, repeats \expid{E5} with a larger auxiliary weight. This run is not treated as part of the core mainline narrative. Instead, it functions as a robustness check for the auxiliary setting and supports the final \expid{E5} selection using validation-side model comparison.
+
+\subsection{Training Setup}
+
+Across the mainline experiments, we keep the core hyperparameters fixed: model = \model{}, epochs = 3, batch size = 2, gradient accumulation steps = 4, learning rate = $5\times 10^{-5}$, warmup steps = 20, maximum sequence length = 512, and training seed = 42. Holding these settings constant helps keep the pairwise comparisons interpretable. Model selection is based on validation performance rather than test-set outcomes. For the \expid{E5} versus \expid{E5W} comparison, we use validation main loss rather than test metrics to decide which auxiliary-weight variant should represent the mainline auxiliary configuration.
+
+\subsection{Evaluation Protocol}
+
+We report automatic metrics only in the current report version. The headline metrics are target-conditioned perplexity, ROUGE-L \citep{lin2004rouge}, and BERTScore F1 \citep{zhang2020bertscore}. We additionally report entity overlap as a diagnostic metric. It is useful for rough consistency inspection, but it is not treated as the sole basis for major claims because it is a lightweight heuristic rather than a full semantic evaluation.
+
+Generation-based metrics are evaluated with three fixed random seeds (13, 42, and 2026). We report the mean for all metrics and the standard deviation for generation-based metrics. Perplexity is deterministic for a fixed checkpoint and is therefore reported as a mean or single-value quantity across seeds. This evaluation protocol is intended to distinguish stable model differences from small amounts of sampling variance.
+
+\subsection{Scope Note}
+
+Human evaluation was planned as an optional extension but is deferred in the current report version. Retrieval is reserved for an appendix-level ablation and has not yet been executed in a way that can support present conclusions. Accordingly, the present report uses only the completed \expid{E1}--\expid{E5} automatic evaluation evidence when making its main claims.
+
+\section{Numerical Results}
+
+\subsection{Main Results}
+
+Table~\ref{tab:results} summarizes the mainline results. Test metrics are reported on the full held-out test set of \testcount{} samples.
+
+\begin{table*}[t]
+\caption{Mainline results on the held-out test set. Perplexity is deterministic for a fixed checkpoint, while ROUGE-L, BERTScore F1, and entity overlap are reported as mean $\pm$ standard deviation over three decoding seeds.}
+\label{tab:results}
+\centering
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+Experiment & Validation Main Loss & Validation PPL & Test PPL & ROUGE-L & BERTScore F1 & Entity Overlap \\
+\midrule
+\expid{E1} & 3.1019 & 25.1105 & 27.8093 & $0.1113 \pm 0.0009$ & $0.8341 \pm 0.0004$ & $0.1435 \pm 0.0031$ \\
+\expid{E2} & 3.0998 & 25.1061 & 27.8216 & $0.1124 \pm 0.0002$ & $0.8343 \pm 0.0001$ & $0.1434 \pm 0.0025$ \\
+\expid{E3} & 3.0860 & 25.0467 & 27.6525 & $0.1115 \pm 0.0003$ & $0.8343 \pm 0.0004$ & $0.1266 \pm 0.0008$ \\
+\expid{E4} & 3.2966 & 30.3848 & 32.6382 & $0.1097 \pm 0.0005$ & $0.8329 \pm 0.0004$ & $0.1275 \pm 0.0039$ \\
+\expid{E5} & 3.1022 & 25.6313 & 28.2869 & $0.1113 \pm 0.0012$ & $0.8343 \pm 0.0002$ & $0.1207 \pm 0.0014$ \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+For robustness checking, \expid{E5W} achieves a validation main loss of 3.1062, validation perplexity of 25.8169, test perplexity of 28.5020, ROUGE-L of $0.1111 \pm 0.0007$, BERTScore F1 of $0.8343 \pm 0.0003$, and entity overlap of $0.1231 \pm 0.0041$. Because it does not improve the validation-side selection criterion relative to \expid{E5}, it is not used as the main auxiliary result in Table~\ref{tab:results}.
+
+\subsection{Pairwise Analysis}
+
+\paragraph{\expid{E1} vs.\ \expid{E2}: input structure.}
+The comparison between \expid{E1} and \expid{E2} suggests that structured paragraph formatting is mildly helpful, but not transformative. \expid{E2} improves ROUGE-L from 0.1113 to 0.1124 and slightly improves BERTScore F1 from 0.8341 to 0.8343. Validation main loss also drops marginally from 3.1019 to 3.0998. These changes are directionally positive, but very small in magnitude. The most reasonable interpretation is that explicit paragraph markers provide a modest improvement in input readability for the model, rather than a large change in continuation quality.
+
+\paragraph{\expid{E2} vs.\ \expid{E3}: context length.}
+The comparison between \expid{E2} and \expid{E3} tests whether increasing the context window from two paragraphs to four paragraphs improves generation quality. \expid{E3} produces the best validation main loss (3.0860) and the best validation perplexity (25.0467) among the mainline configurations. Its test perplexity (27.6525) is also the lowest in the mainline results. At the same time, ROUGE-L and BERTScore remain very close to \expid{E2}, indicating that the benefit of longer context is more visible on the likelihood-based side than on overlap-based generation metrics. Taken together, these results support the view that four structured paragraphs give the model a better overall information state without dramatically changing lexical overlap with the reference continuation.
+
+\paragraph{\expid{E3} vs.\ \expid{E4}: full fine-tuning vs.\ LoRA.}
+The \expid{E3} versus \expid{E4} comparison is the clearest result in the study. Under the same long structured context setting, LoRA substantially underperforms full fine-tuning. Validation main loss rises from 3.0860 to 3.2966, and test perplexity rises sharply from 27.6525 to 32.6382. ROUGE-L and BERTScore also decrease. This suggests that, for this small backbone and this literary continuation task, full parameter adaptation remains more effective than the chosen LoRA setup.
+
+\paragraph{\expid{E3} vs.\ \expid{E5}: auxiliary ranking objective.}
+The \expid{E3} versus \expid{E5} comparison shows that the ranking-based auxiliary objective does not provide a clear advantage over the strongest no-auxiliary baseline. \expid{E5} has higher validation main loss (3.1022 vs.\ 3.0860), higher validation perplexity (25.6313 vs.\ 25.0467), and higher test perplexity (28.2869 vs.\ 27.6525). ROUGE-L and BERTScore are nearly unchanged, while entity overlap is lower. The most cautious interpretation is that the auxiliary ranking objective, in its current design and weighting, does not improve the mainline continuation system and may slightly harm its calibration.
+
+\subsection{\expid{E5} Robustness Note}
+
+We additionally compare \expid{E5} with \expid{E5W}, which uses a larger auxiliary weight. The validation main loss of \expid{E5W} (3.1062) is slightly worse than that of \expid{E5} (3.1022). The difference is small, so \expid{E5W} is useful as a robustness check. However, it does not alter the main conclusion: increasing the auxiliary weight does not produce a stronger result than the main \expid{E5} configuration, and neither auxiliary run surpasses \expid{E3}.
+
+\subsection{Qualitative Examples}
+
+Qualitative examples should be included in the final report to support the numerical findings. The best use of these examples is not to showcase isolated successes, but to illustrate the characteristic differences implied by the mainline results. In particular, the final version should include one example where \expid{E3} remains more consistent with the scene or character state than \expid{E4}, one example where \expid{E3} and \expid{E5} are similar in fluency but \expid{E5} does not show an obvious coherence advantage, and optionally one example where structured input helps avoid a local discourse break relative to plain input.
+
+\subsection{Limitations}
+
+This study has several limitations. First, the report currently relies on automatic evaluation only; no human evaluation is included in the present version. Second, the experiments use a single-domain literary corpus, so the findings may not transfer directly to broader open-domain continuation settings. Third, the backbone model is relatively small, which may limit both absolute generation quality and the value of more complex training strategies. Fourth, the retrieval appendix has not yet been completed, so retrieval-based evidence is intentionally excluded from the current conclusions.
+
+\section{Conclusion}
+
+This report presented a controlled study of contextual coherence in Sherlock Holmes paragraph continuation using a shared \model{} backbone and a proposal-aligned main experiment line. The empirical conclusions are consistent across the completed \expid{E1}--\expid{E5} comparisons. Structured paragraph formatting yields only a modest benefit over plain context serialization. Increasing the context window to four paragraphs under structured full fine-tuning gives the strongest overall mainline configuration, with \expid{E3} achieving the best validation-side metrics and the lowest test perplexity among the completed runs. LoRA performs noticeably worse than full fine-tuning in this setting, and the ranking-based auxiliary objective does not outperform the strongest no-auxiliary baseline.
+
+Taken together, these findings suggest that, for this task and model scale, improvements to the conditioning context are more valuable than switching to parameter-efficient adaptation or adding a simple ranking-based auxiliary loss. In other words, the most reliable gains in the current setup come from giving the model a better representation of the preceding narrative rather than from increasing training-objective complexity.
+
+Several directions remain open for future work. First, the reserved retrieval appendix should be completed to test whether external paragraph evidence can improve coherence beyond the current mainline systems. Second, human evaluation would provide a more direct assessment of narrative consistency than automatic metrics alone. Third, it would be valuable to test whether the current conclusions persist with larger backbones or with alternative auxiliary objectives that target discourse structure more directly.
+
+\section{Statement of Individual Contributions}
+
+Replace the placeholders below with the actual team contribution split before submission.
+
+\begin{itemize}
+\item Member A: dataset construction, preprocessing, and experiment orchestration.
+\item Member B: model training pipeline and Colab execution.
+\item Member C: evaluation pipeline, analysis, and result verification.
+\item Member D: report writing, literature review, and final integration.
+\end{itemize}
+
+\appendix
+
+\section{Retrieval-Augmented Extension (Reserved)}
+
+Retrieval was planned as an appendix-level ablation rather than as the main contribution of the project. At the time of writing this mainline report, retrieval experiment execution has not yet been completed. Therefore, no retrieval result is used in the present conclusions. This appendix is intentionally reserved for later completion.
+
+\section{Additional Experimental Details}
+
+The appendix can later be expanded with the following material:
+\begin{itemize}
+\item exact dataset statistics and split counts;
+\item token budget and truncation observations;
+\item generation settings;
+\item the detailed \expid{E5} versus \expid{E5W} robustness comparison;
+\item additional qualitative examples.
+\end{itemize}
+
+\IfFileExists{icml2026.bst}{\bibliographystyle{icml2026}}{\bibliographystyle{plainnat}}
+\bibliography{references}
+
+\end{document}
