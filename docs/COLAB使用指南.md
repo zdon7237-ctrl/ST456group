@@ -104,10 +104,10 @@
 
 1. 先看第一格参数区
 2. 按需要修改：
-   - `QUICK_VALIDATION`（当前默认开启）
-   - `USE_GOOGLE_DRIVE`（当前默认开启）
+   - `QUICK_VALIDATION`（当前默认关闭）
+   - `USE_GOOGLE_DRIVE`（当前默认关闭）
    - `RUN_FULL_MAINLINE`
-   - `RUN_APPENDIX_RETRIEVAL`
+   - `RUN_APPENDIX_RETRIEVAL`（当前默认关闭）
    - `DOWNLOAD_RESULTS_ZIP`
 3. 点击：
    - `Runtime -> Run all`
@@ -169,22 +169,27 @@ notebook 会自动：
 
 这样可以在几分钟内跑通 E1-E5 全流程，确认代码和环境没有问题。
 
-当前 notebook 默认就是这组更稳妥的设置：
+当前 notebook 默认已经切到正式全量主线：
 
-- `USE_GOOGLE_DRIVE = True`
-- `QUICK_VALIDATION = True`
+- `USE_GOOGLE_DRIVE = False`
+- `QUICK_VALIDATION = False`
+- `RUN_FULL_MAINLINE = True`
+- `RUN_APPENDIX_RETRIEVAL = False`
+- `DOWNLOAD_RESULTS_ZIP = True`
 
 ### 正式实验设置
 
 确认快速验证通过后，改为：
 
-- `USE_GOOGLE_DRIVE = True`
+- `USE_GOOGLE_DRIVE = False` 或 `True`（按你是否需要持久化结果决定）
 - `QUICK_VALIDATION = False`
 - `RUN_FULL_MAINLINE = True`
 
 这样会用完整的 3 epochs 训练和全量测试集评估。
 
 正式评估默认会对每个实验用 3 个固定 seed 做生成和自动评测，最终汇总成 `metrics_*_summary.csv`。
+
+主 notebook 现在会在每个实验训练结束后、每个实验评测结束后自动执行一次 GPU cache 清理，并打印当前 `allocated/reserved` 显存摘要，帮助降低长流程里显存碎片积累的风险。
 
 其中：
 
