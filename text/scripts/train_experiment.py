@@ -21,6 +21,7 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_training_config(args.config)
+    # Let the CLI pin the training seed even if the config file says otherwise.
     config["seed"] = args.seed
     if config.get("use_retrieval", False):
         train_retrieval_model(config)

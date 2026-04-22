@@ -38,6 +38,7 @@ def main() -> None:
     args = parser.parse_args()
 
     rows = load_jsonl(args.generated_path)
+    # Load the checkpoint so perplexity is scored with the same model family that produced the samples.
     model, tokenizer = load_trained_model_and_tokenizer(args.model_dir)
     metrics = evaluate_generated_rows(rows, model=model, tokenizer=tokenizer)
     write_metrics_csv(metrics, args.output_path)

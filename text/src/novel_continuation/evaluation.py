@@ -108,6 +108,7 @@ def build_conditional_ppl_example(
         gold_target,
         max_target_tokens=max_target_tokens,
     )
+    # Keep the target section intact and spend any truncation budget on the prompt side.
     max_prompt_tokens = max(0, max_length - len(delimiter_ids) - len(prefix_ids) - len(target_ids))
     prompt_ids = prompt_ids[-max_prompt_tokens:] if max_prompt_tokens else []
     input_ids = prompt_ids + delimiter_ids + prefix_ids + target_ids
@@ -127,6 +128,7 @@ def _accumulate_shifted_nll(logits, labels) -> tuple[float, int]:
         reduction="none",
         ignore_index=-100,
     ).view(shifted_labels.size())
+    # Count supervised tokens after the causal shift so weighting matches the actual loss.
     token_mask = shifted_labels.ne(-100)
     supervised_tokens = int(token_mask.sum().item())
     total_nll = float((token_losses * token_mask).sum().item())
@@ -165,6 +167,7 @@ def compute_perplexity(model, tokenizer, rows: list[dict[str, str]]) -> float:
         with torch.no_grad():
             outputs = model(**encoded)
         sample_nll, sample_supervised_tokens = _accumulate_shifted_nll(outputs.logits, label_tensor)
+        # Aggregate token-level NLL so perplexity stays length-weighted across samples.
         total_nll += sample_nll
         total_supervised_tokens += sample_supervised_tokens
     if total_supervised_tokens == 0:
@@ -236,6 +239,7 @@ def summarise_seed_metrics(metrics_by_seed: list[dict[str, float]]) -> dict[str,
     for key in metric_keys:
         values = [float(metrics[key]) for metrics in metrics_by_seed]
         summary[f"{key}_mean"] = sum(values) / len(values)
+        # Only generation-based metrics get a seed std because perplexity is deterministic per checkpoint.
         if key in GENERATION_METRIC_KEYS:
             summary[f"{key}_std"] = float(statistics.pstdev(values)) if len(values) > 1 else 0.0
     return summary

@@ -120,6 +120,7 @@ def generate_rows(
 
     training_metadata = load_training_metadata(model_dir)
     saved_config = training_metadata.get("config", {})
+    # Reuse the saved training prompt settings unless the CLI overrides them.
     resolved_context_format = context_format or saved_config.get("context_format", "plain")
     resolved_context_size = int(saved_config.get("context_size", len(rows[0]["context"]) if rows else 1))
 
@@ -139,8 +140,10 @@ def generate_rows(
             include_retrieval=use_retrieval,
             context_format=resolved_context_format,
         )
+        # Append the target marker so decoding starts exactly at the continuation boundary.
         inference_prompt = f"{prompt}{TARGET_SECTION_DELIMITER}{TARGET_SECTION_PREFIX}"
         max_positions = getattr(model.config, "n_positions", 1024)
+        # Reserve room for new tokens by truncating the prompt side first.
         max_input_len = max_positions - max_new_tokens
         if max_input_len < 1:
             max_input_len = 1

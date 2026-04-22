@@ -35,6 +35,7 @@ def main() -> None:
     max_target_tokens = resolve_max_target_tokens(config, train_records, tokenizer)
 
     if config.get("use_retrieval", False):
+        # Attach retrieval here so the token budget matches the real training prompt shape.
         train_targets = [record["target"] for record in train_records]
         eval_targets = [record["target"] for record in eval_records]
         train_records = attach_retrieval(train_records, train_targets, top_k=int(config["top_k"]))

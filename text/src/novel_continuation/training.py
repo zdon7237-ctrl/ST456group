@@ -52,6 +52,7 @@ def _resolve_path(value: str, config_path: Path) -> str:
     if raw_path.is_absolute():
         return str(raw_path)
 
+    # Prefer config-relative paths before falling back to the project root.
     config_dir_candidate = (config_path.parent / raw_path).resolve()
     if config_dir_candidate.exists():
         return str(config_dir_candidate)
@@ -194,6 +195,7 @@ def choose_max_target_tokens(
     if not lengths:
         raise ValueError("lengths must not be empty")
 
+    # Use a rounded high-percentile length so rare long targets do not dominate the cap.
     ordered = sorted(lengths)
     percentile_index = max(0, math.ceil(len(ordered) * percentile) - 1)
     threshold = ordered[min(percentile_index, len(ordered) - 1)]
@@ -248,6 +250,7 @@ def summarise_token_budget(
             context_format=context_format,
         )
         prompt_tokens = len(tokenizer(prompt_text, add_special_tokens=False)["input_ids"])
+        # Mirror the full serialized training input, including the delimiter and target marker.
         target_section_tokens = _estimate_serialised_target_section_length(
             tokenizer,
             record["target"],
@@ -280,6 +283,7 @@ def attach_retrieval(
     enriched: list[dict] = []
     for index, record in enumerate(records):
         query = "\n".join(record["context"])
+        # Limit retrieval to evidence that would already exist at this step.
         available_count = len(history_prefix) + min(index, len(retrieval_candidates))
         if retrieval_index is None or available_count == 0:
             retrieved = []
@@ -324,6 +328,7 @@ def select_negative_candidates(records: list[dict], index: int, num_negative_can
     needed = num_negative_candidates
 
     if neg_index is not None:
+        # Prefer same-book hard negatives before falling back to same-split examples.
         same_book_indices = neg_index["by_book"].get(current_book, []) if current_book else []
         for ci in same_book_indices:
             if ci == index:
@@ -405,6 +410,7 @@ def prepare_training_records(
 
     prepared = []
     for index, record in enumerate(records):
+        # Freeze the final context window here so every downstream stage sees the same prompt view.
         context_window = select_context_window(record["context"], context_size)
         retrieved_texts = [item["text"] for item in record.get("retrieved", [])]
         prepared_record = {
@@ -470,6 +476,7 @@ def serialise_config_for_json(config: dict) -> dict[str, Any]:
 def save_training_metadata(output_dir: str, config: dict, metadata: dict[str, Any]) -> None:
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
+    # Keep the resolved config and validation summary next to the saved checkpoint.
     payload = {"config": serialise_config_for_json(config), "metadata": metadata}
     (output_path / "training_config.json").write_text(
         json.dumps(payload, indent=2, ensure_ascii=False),
@@ -702,6 +709,7 @@ def evaluate_validation_main_metrics(trainer, tokenizer) -> dict[str, float]:
         trainer.aux_objective = original_aux_objective
         trainer.data_collator.aux_objective = original_collator_aux
 
+    # Recompute validation perplexity from the masked main objective rather than the trainer's total loss.
     return {
         "validation_main_loss": float(validation_metrics["validation_main_loss"]),
         "validation_perplexity": float(compute_perplexity(trainer.model, tokenizer, eval_rows)),

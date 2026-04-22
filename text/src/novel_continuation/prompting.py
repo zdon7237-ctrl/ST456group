@@ -16,12 +16,14 @@ def build_prompt(
     if context_format == "plain":
         sections.extend(context)
     else:
+        # Keep paragraph boundaries explicit in the structured prompt variant.
         for index, paragraph in enumerate(context, start=1):
             sections.extend([f"[PARAGRAPH {index}]", paragraph])
 
     retrieval_items = retrieved or []
     if include_retrieval and retrieval_items:
         sections.extend(["", "[RETRIEVED]"])
+        # Keep retrieved evidence in a separate block so it does not blend into the main context.
         if context_format == "plain":
             sections.extend(retrieval_items)
         else:

@@ -69,6 +69,7 @@ def main() -> None:
 
     def ensure_model_loaded():
         nonlocal model, tokenizer
+        # Reuse one loaded checkpoint across seeds to avoid repeated startup cost.
         if model is None or tokenizer is None:
             model, tokenizer = load_trained_model_and_tokenizer(args.model_dir)
         return model, tokenizer
@@ -76,6 +77,7 @@ def main() -> None:
     for seed in args.seeds:
         generated_path = output_dir / f"generated_samples_{experiment_id}_seed{seed}.jsonl"
         metrics_path = output_dir / f"metrics_{experiment_id}_seed{seed}.csv"
+        # Reuse completed artifacts so a disconnected Colab session can resume mid-run.
         if args.skip_existing and generated_path.exists() and metrics_path.exists():
             metrics_by_seed.append(load_metrics_csv(metrics_path))
             continue
@@ -109,6 +111,7 @@ def main() -> None:
         write_metrics_csv(metrics, metrics_path)
         metrics_by_seed.append(metrics)
 
+    # Always rebuild the summary from the full set of per-seed metrics that were collected.
     summary = summarise_seed_metrics(metrics_by_seed)
     summary_path = output_dir / f"metrics_{experiment_id}_summary.csv"
     write_metrics_csv(summary, summary_path)

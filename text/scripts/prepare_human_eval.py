@@ -46,6 +46,7 @@ def build_human_eval_rows(rows: list[dict], system_label: str) -> list[dict[str,
                 f"Generated sample row is missing required fields: {missing_fields}"
             )
 
+        # Keep the exported row shape aligned with the generation JSONL contract.
         prepared_row = {
             "sample_id": row["sample_id"],
             "system_label": system_label,

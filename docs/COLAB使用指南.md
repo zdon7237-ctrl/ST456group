@@ -4,7 +4,7 @@
 
 - E1-E5 是主实验
 - retrieval 只作为 appendix / 附加实验
-- 主要运行目录是压缩包里的 `codex-novel-continuation/`
+- 主要运行目录是压缩包里的 `text/`
 
 推荐直接使用同目录下的 notebook：
 
@@ -37,11 +37,11 @@
 
 压缩包里至少要包含：
 
-- `codex-novel-continuation/`
+- `text/`
 - `docs/`
 - `proposal.md`
 
-最关键的是 `codex-novel-continuation/` 必须在压缩包里。
+最关键的是 `text/` 必须在压缩包里。
 
 ### Notebook 文件
 
@@ -107,7 +107,7 @@
    - `QUICK_VALIDATION`（当前默认关闭）
    - `USE_GOOGLE_DRIVE`（当前默认关闭）
    - `RUN_FULL_MAINLINE`
-   - `RUN_APPENDIX_RETRIEVAL`（当前默认关闭）
+   - `RUN_APPENDIX_RETRIEVAL`（当前默认开启）
    - `DOWNLOAD_RESULTS_ZIP`
 3. 点击：
    - `Runtime -> Run all`
@@ -123,7 +123,7 @@
 notebook 会自动：
 
 - 解压压缩包
-- 找到 `codex-novel-continuation/`
+- 找到 `text/`
 - 进入该目录
 - 安装依赖并继续运行
 
@@ -136,7 +136,7 @@ notebook 会自动：
 1. 可选挂载 Google Drive
 2. 让你上传 `ST456group.zip`
 3. 自动解压 zip
-4. 自动找到 `codex-novel-continuation/`
+4. 自动找到 `text/`
 5. 安装 `requirements.txt`
 6. 下载 Sherlock Holmes 数据
 7. 构建 `train/val/test` 数据集
@@ -145,7 +145,7 @@ notebook 会自动：
 10. 运行 3-seed 样本生成与自动评估
 11. 比较 E5 不同 `aux_weight` 的 validation main loss
 12. 可选导出人工评测 CSV
-13. 可选跑 retrieval appendix
+13. 运行 retrieval appendix
 14. 可选打包并下载结果
 
 ---
@@ -159,7 +159,7 @@ notebook 会自动：
 - `USE_GOOGLE_DRIVE = True`
 - `QUICK_VALIDATION = True`
 - `RUN_FULL_MAINLINE = True`
-- `RUN_APPENDIX_RETRIEVAL = False`
+- `RUN_APPENDIX_RETRIEVAL = True`
 - `DOWNLOAD_RESULTS_ZIP = True`
 
 快速验证模式会：
@@ -174,7 +174,7 @@ notebook 会自动：
 - `USE_GOOGLE_DRIVE = False`
 - `QUICK_VALIDATION = False`
 - `RUN_FULL_MAINLINE = True`
-- `RUN_APPENDIX_RETRIEVAL = False`
+- `RUN_APPENDIX_RETRIEVAL = True`
 - `DOWNLOAD_RESULTS_ZIP = True`
 
 ### 正式实验设置
@@ -219,7 +219,7 @@ notebook 会自动：
 
 ## 7. 关键输出文件
 
-主实验输出会在 `codex-novel-continuation/` 下生成：
+主实验输出会在 `text/` 下生成：
 
 - `artifacts/e1_plain_full/`
 - `artifacts/e2_structured_full/`
@@ -235,9 +235,9 @@ notebook 会自动：
 如果你同时跑了 E5 的两个 `aux_weight` 版本，建议直接运行：
 
 ```bash
-python codex-novel-continuation/scripts/compare_aux_weight.py \
-  codex-novel-continuation/artifacts/e5_aux_ranking \
-  codex-novel-continuation/artifacts/e5_aux_ranking_wide
+python text/scripts/compare_aux_weight.py \
+  text/artifacts/e5_aux_ranking \
+  text/artifacts/e5_aux_ranking_wide
 ```
 
 再按输出里的 `validation_main_loss` 结论决定最终把哪一个 E5 放进主结果表。
@@ -256,11 +256,11 @@ python codex-novel-continuation/scripts/compare_aux_weight.py \
 
 - `Runtime -> Change runtime type -> GPU`
 
-### 2. 上传 zip 后找不到 `codex-novel-continuation/`
+### 2. 上传 zip 后找不到 `text/`
 
 解决方法：
 
-- 检查压缩包里是否真的包含 `codex-novel-continuation` 文件夹
+- 检查压缩包里是否真的包含 `text` 文件夹
 - 最稳妥的方式是直接把整个 `ST456group` 文件夹压缩，而不是只挑部分文件
 
 ### 3. E3-E5 太慢或显存紧张
@@ -287,7 +287,7 @@ python codex-novel-continuation/scripts/compare_aux_weight.py \
 2. 重新运行前面的环境准备格，至少做到：
    - 挂载 Drive
    - 上传 zip
-   - 解压并重新进入 `codex-novel-continuation/`
+   - 解压并重新进入 `text/`
    - 安装依赖
 3. 先检查 Drive 工作区里已有的输出目录，例如：
    - `artifacts/e1_plain_full/`
@@ -337,7 +337,7 @@ retrieval 只保留为 appendix / optional ablation。
 ## 10. 相关文件
 
 - 主 notebook：`docs/ST456_colab_一键运行.ipynb`
-- 主 Colab 说明：`codex-novel-continuation/docs/colab-run-guide.md`
-- notebook 版说明：`codex-novel-continuation/docs/colab-notebook-guide.md`
-- 主实验矩阵：`codex-novel-continuation/docs/experiments/main-experiment-matrix.md`
-- 人评 rubric：`codex-novel-continuation/docs/human-eval-rubric.md`
+- 主 Colab 说明：`text/docs/colab-run-guide.md`
+- notebook 版说明：`text/docs/colab-notebook-guide.md`
+- 主实验矩阵：`text/docs/experiments/main-experiment-matrix.md`
+- 人评 rubric：`text/docs/human-eval-rubric.md`

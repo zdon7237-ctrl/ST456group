@@ -25,6 +25,7 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_training_config(args.config)
+    # Let the CLI pin the training seed even if the config file says otherwise.
     config["seed"] = args.seed
     train_baseline_model(config)
 

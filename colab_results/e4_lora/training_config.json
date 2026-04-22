@@ -13,9 +13,9 @@
     "max_grad_norm": 1.0,
     "seed": 42,
     "model_name": "distilgpt2",
-    "train_path": "/content/ST456group/codex-novel-continuation/data/processed/train.jsonl",
-    "eval_path": "/content/ST456group/codex-novel-continuation/data/processed/val.jsonl",
-    "output_dir": "/content/ST456group/codex-novel-continuation/artifacts/e4_lora",
+    "train_path": "/content/ST456group/text/data/processed/train.jsonl",
+    "eval_path": "/content/ST456group/text/data/processed/val.jsonl",
+    "output_dir": "/content/ST456group/text/artifacts/e4_lora",
     "max_length": 512,
     "batch_size": 2,
     "gradient_accumulation_steps": 4,
@@ -40,7 +40,7 @@
     },
     "validation": {
       "validation_main_loss": 3.2966041564941406,
-      "validation_perplexity": 30.384771464308084
+      "validation_perplexity": 30.384770802299013
     }
   }
 }

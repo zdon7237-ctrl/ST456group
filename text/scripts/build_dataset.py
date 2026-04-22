@@ -38,6 +38,7 @@ def build_dataset(raw_dir: Path, output_dir: Path, context_size: int, min_chars:
             source_title=source["title"],
         )
 
+        # Split each book in order so train, val, and test stay within-book.
         for index, example in enumerate(examples):
             split_name = assign_split(index, len(examples))
             example["split"] = split_name

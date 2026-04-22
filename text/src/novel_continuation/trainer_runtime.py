@@ -36,6 +36,7 @@ def build_prompt_with_budget(
     )
     prompt_ids = tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
 
+    # Trim the oldest context first so the newest paragraphs stay in view.
     while len(prompt_ids) > max_prompt_tokens and len(effective_context) > 1:
         effective_context = effective_context[1:]
         prompt_text = build_prompt(
@@ -46,6 +47,7 @@ def build_prompt_with_budget(
         )
         prompt_ids = tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
 
+    # Drop retrieval evidence only after the main context has been squeezed.
     while len(prompt_ids) > max_prompt_tokens and effective_retrieved:
         effective_retrieved = effective_retrieved[:-1]
         prompt_text = build_prompt(
@@ -56,6 +58,7 @@ def build_prompt_with_budget(
         )
         prompt_ids = tokenizer(prompt_text, add_special_tokens=False)["input_ids"]
 
+    # Left-truncate as a last resort when the prompt still overflows.
     if len(prompt_ids) > max_prompt_tokens:
         prompt_ids = prompt_ids[-max_prompt_tokens:]
         prompt_text = tokenizer.decode(prompt_ids, clean_up_tokenization_spaces=False)
@@ -104,6 +107,7 @@ class ContinuationDataCollator:
             max_prompt_tokens=max_prompt_tokens,
         )
         full_input_ids = prompt_ids + self.delimiter_ids + target_section_ids
+        # Mask the prompt and target marker so the main loss only sees target tokens.
         labels = ([-100] * (len(prompt_ids) + len(self.delimiter_ids) + len(target_prefix_ids))) + target_body_ids
         return full_input_ids, labels, prompt_text, prompt_ids
 
@@ -171,6 +175,7 @@ class ContinuationDataCollator:
                 candidate_masks = list(candidate_masks)
                 candidate_labels = list(candidate_labels)
                 class_labels = list(class_labels)
+                # Pad candidate slots so the batch reshapes cleanly into [B, C, T].
                 for _ in range(padded_count):
                     candidate_inputs.append([])
                     candidate_masks.append([])
@@ -233,6 +238,7 @@ def compute_candidate_scores(logits, labels):
         ignore_index=-100,
     ).view(shifted_labels.size())
 
+    # Normalize by supervised token count so longer candidates are comparable.
     token_mask = shifted_labels.ne(-100)
     token_counts = token_mask.sum(dim=-1).clamp(min=1)
     normalised_loss = (losses * token_mask).sum(dim=-1) / token_counts
@@ -255,6 +261,7 @@ def encode_target_with_prefix(
         f"{TARGET_SECTION_PREFIX}{truncated_target}",
         add_special_tokens=False,
     )["input_ids"]
+    # Recheck the shared prefix boundary so training and evaluation split targets the same way.
     if full_ids[: len(prefix_ids)] != prefix_ids:
         raise ValueError(
             "Target section tokenization no longer preserves the [TARGET] prefix boundary. "

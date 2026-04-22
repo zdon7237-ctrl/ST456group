@@ -71,6 +71,7 @@ def main() -> None:
     right_loss = right_metrics["validation_main_loss"]
     gap_percent = relative_gap_percent(left_loss, right_loss)
 
+    # Use validation_main_loss only so the test set never becomes a selection signal.
     if gap_percent <= args.threshold_percent:
         recommendation = (
             f"keep both {left_label} and {right_label} as a robustness check "
