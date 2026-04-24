@@ -60,58 +60,60 @@
 \printAffiliationsAndNotice{}
 
 \begin{abstract}
-We study next-paragraph generation in Sherlock Holmes stories with a controlled set of GPT-2 fine-tuning experiments. Given the first $k$ paragraphs of a passage, the model predicts the next one. We keep the backbone fixed at \model{} and vary four design choices: prompt format, context length, tuning strategy, and an auxiliary ranking loss. We evaluate five main experiments (\expid{E1}--\expid{E5}) with target-conditioned perplexity, ROUGE-L, BERTScore, and a simple entity-overlap diagnostic under three decoding seeds. Structured formatting helps a little. Moving from two paragraphs to four helps more, and \expid{E3} gives the best overall result. LoRA falls well behind full fine-tuning in this setting. The ranking objective does not beat the strongest baseline. Appendix~A reports a retrieval comparison, but it does not beat \expid{E3}.
+We study next-paragraph generation in Sherlock Holmes stories using a controlled set of GPT-2 fine-tuning experiments. Given the first $k$ paragraphs of a passage, the model has to produce the next one. We keep the backbone fixed at \model{} and vary prompt format, context length, tuning strategy, and an auxiliary ranking loss. The five main experiments (\expid{E1}--\expid{E5}) are evaluated with target-conditioned perplexity, ROUGE-L, BERTScore, and an entity-overlap diagnostic, using three decoding seeds for generation metrics. The pattern is modest but consistent: structured formatting helps a little, four paragraphs of context help more, and \expid{E3} is the strongest run overall. LoRA is much weaker than full fine-tuning here, and the ranking objective does not improve on the best baseline. A retrieval variant is included in Appendix~A, where it also trails \expid{E3}.
 \end{abstract}
 
 \section{Introduction}
 
-Neural generators still struggle once coherence has to stretch past a sentence or two. A model can write fluent text and still lose the scene, shift the speaker, or contradict what just happened. Paragraph continuation makes that problem hard to ignore. The system has to write the next paragraph from a short but information-rich discourse history, so fluency alone is not enough.
+Neural generators can sound fluent while losing track of what is happening. In a paragraph-continuation task, that weakness is hard to hide: the next paragraph has to follow the scene, the speaker, and the local plot, rather than merely produce plausible Victorian prose. This makes the task a useful test of coherence beyond sentence-level fluency.
 
-The Sherlock Holmes stories give us a good testbed for this setting. The books share a stable narrative world, a small set of recurring characters, and a fairly consistent register. That makes the failures easy to see. If a continuation drifts, the reader notices.
+The Sherlock Holmes stories are a convenient testbed because the narrative world is stable. Holmes, Watson, the London setting, and the style recur across the texts. When a continuation drifts away from that world, the error is usually visible rather than subtle.
 
-Our question is narrow on purpose: which modeling choices matter most for paragraph continuation in this setting? We leave retrieval and prompt tricks out of the main story. Instead, we compare the choices that sit closest to the model itself: how we serialize context, how much context we give it, whether LoRA can match full fine-tuning, and whether an auxiliary ranking loss helps.
+We ask a deliberately narrow question: which model-side choices matter for paragraph continuation in this setting? The main comparison does not rely on retrieval or prompt engineering tricks. It focuses on context serialization, context length, full fine-tuning versus LoRA, and a simple auxiliary ranking loss.
 
 The mainline follows four pairwise comparisons. \expid{E1} versus \expid{E2} asks whether structured paragraph markers help more than plain concatenation. \expid{E2} versus \expid{E3} asks whether a longer context window helps. \expid{E3} versus \expid{E4} compares full fine-tuning with LoRA under the same long-context structured setup. \expid{E3} versus \expid{E5} tests the auxiliary ranking objective against the strongest no-auxiliary baseline. We also run \expid{E5W} as a robustness check for the auxiliary weight, but we do not treat it as a separate mainline result.
 
-The results line up cleanly. Structured input helps a little. Longer context helps more, and \expid{E3} is the strongest model in the mainline. LoRA performs worse than full fine-tuning here. The auxiliary ranking loss does not improve on the strongest baseline. Retrieval stays in the appendix because it does not change that picture.
+The results are not dramatic, but they are fairly easy to read. Structured input gives a small gain. Longer context gives the clearest gain, making \expid{E3} the strongest mainline model. LoRA performs worse than full fine-tuning, and the auxiliary ranking loss does not improve on that baseline. Retrieval is kept in the appendix because it does not change the conclusion.
 
 \section{Related Work}
 
-Our work sits closest to the literature on autoregressive transformers for conditional text generation. These models fit continuation tasks naturally because they generate left to right and adapt well through fine-tuning \citep{vaswani2017attention,radford2019language}. GPT-style models matter here for a practical reason too. They are strong enough to show meaningful differences between design choices, but small enough to run in a controlled Colab workflow.
+This project is closest to work on autoregressive transformers for conditional text generation. These models fit continuation tasks naturally: they generate left to right, and pre-trained GPT-style models can be adapted with ordinary fine-tuning \citep{vaswani2017attention,radford2019language}. The choice is also practical. A small GPT-2 variant is large enough to show differences between settings, but still small enough for repeated Colab runs.
 
-The paper also connects to long-form and story generation, where coherence remains the central difficulty. Prior work shows the same pattern again and again: models can look fluent locally and still lose the thread over longer spans \citep{fan2018hierarchical,holtzman2020curious}. Paragraph continuation gives us a smaller and cleaner version of that problem.
+The project also relates to long-form and story generation. Prior work has shown that local fluency does not guarantee global coherence \citep{fan2018hierarchical,holtzman2020curious}. Paragraph continuation is a smaller version of the same problem: the output is short, but it still has to respect the preceding discourse.
 
-Parameter-efficient adaptation is the third obvious reference point. Methods such as LoRA try to preserve most of the quality of full fine-tuning while updating far fewer parameters \citep{hu2022lora}. That trade-off is worth testing in our setting because compute is limited and the backbone is small.
+Parameter-efficient adaptation is another relevant comparison. LoRA updates a small set of low-rank adapters rather than all model weights \citep{hu2022lora}. Since this project uses limited compute and a small backbone, it is worth checking whether the cheaper tuning method is enough.
 
-Our last connection is to work that goes beyond plain next-token loss. If token prediction alone leaves coherence on the table, an auxiliary objective might help. That is the motivation behind \expid{E5}. We test a simple ranking signal rather than a more elaborate coherence model. Retrieval belongs in the background here, but only as appendix material.
+Finally, we look at training objectives beyond standard next-token prediction. If the language-model loss is too local to reward paragraph coherence, a ranking signal may help. \expid{E5} tests this idea in a simple form by asking the model to prefer the true next paragraph over sampled alternatives. Retrieval is included only as an appendix comparison.
 
 \section{Methodology and Architecture}
 
 \subsection{Task Formulation}
 
-We treat the task as conditional next-paragraph generation. Each example contains the previous $k$ paragraphs and the next paragraph from the same source text. The loss is token-level, but the target behavior is not. We want a continuation that fits the local scene, keeps the narrative state intact, and does not wander off stylistically or semantically.
+We formulate the task as conditional next-paragraph generation. Each example contains the previous $k$ paragraphs and the true next paragraph from the same book. Training still uses token-level supervision, but the behavior we care about is paragraph-level: the continuation should fit the scene, preserve the narrative state, and stay close to the source style.
 
 \subsection{Backbone Model}
 
-All mainline experiments use \model{} as the shared backbone. We chose it for control as much as for convenience. The model is small enough to train repeatedly in Colab, but still strong enough to make the comparisons matter. Keeping the backbone fixed across \expid{E1}--\expid{E5} lets us attribute most differences to the design choice under test rather than to a change in scale.
+All mainline experiments use \model{} as the shared backbone. This keeps the comparison controlled and keeps the compute manageable. The model is small enough for repeated Colab runs, but not so small that every setting collapses to the same behavior. By holding the backbone fixed across \expid{E1}--\expid{E5}, we can attribute most differences to the design choice being tested.
 
 \subsection{Input Representation}
 
-Our first design choice is prompt format. In the plain setting, we concatenate context paragraphs directly. In the structured setting, we insert explicit paragraph markers. The idea is simple: if the model sees discourse boundaries more clearly, it may keep better track of paragraph roles and local state. We test that in \expid{E1} versus \expid{E2}.
+The first design choice is prompt format. The plain setting concatenates context paragraphs directly. The structured setting adds explicit paragraph markers. The hope is that these markers make discourse boundaries easier for the model to read, especially when several paragraphs are provided. We test this with \expid{E1} versus \expid{E2}.
 
 \subsection{Context Window}
 
-Our second choice is context length. The short setting uses $k=2$ paragraphs and the long setting uses $k=4$. More context may help the model track the scene, characters, and local plot state, but it also pushes against the token budget. We isolate that trade-off through \expid{E2} versus \expid{E3}.
+The second choice is context length. The short setting uses $k=2$ paragraphs; the long setting uses $k=4$. More context should help with scene and character state, but it also leaves less room under the fixed token budget. \expid{E2} and \expid{E3} isolate this trade-off.
 
 \subsection{Fine-Tuning Strategy}
 
-The third comparison is full fine-tuning against LoRA. Full fine-tuning updates the whole model. LoRA trains a small set of low-rank adapters while leaving the base model mostly fixed. We use \expid{E3} versus \expid{E4} to see whether that efficiency trade-off still looks attractive in a small-model literary task.
+The third comparison is full fine-tuning versus LoRA. Full fine-tuning updates all model weights. LoRA trains low-rank adapters while leaving the base model mostly fixed. \expid{E3} and \expid{E4} test whether that efficiency trade-off works for this small literary dataset.
 
 \subsection{Auxiliary Objective}
 
-The last comparison changes the objective. The baseline uses standard causal language-model loss on the target continuation. The auxiliary setting adds a ranking loss that should push the model to score the true next paragraph above sampled negatives. We test that idea through \expid{E3} versus \expid{E5}.
+The final comparison changes the objective. The baseline uses the standard causal language-model loss on the target continuation. The auxiliary setting adds a ranking loss, so the model is also trained to score the true next paragraph above sampled negatives. \expid{E3} and \expid{E5} test whether that extra signal helps.
 
 \section{Training Methods and Experimental Setup}
+
+The implementation uses PyTorch, Hugging Face Transformers, and PEFT. The course permits either TensorFlow or PyTorch; we used PyTorch because TensorFlow GPU support was not reliable across all group members' local machines. To keep the setup consistent, every reported training, generation, and evaluation run was executed in Google Colab.
 
 \subsection{Dataset and Preprocessing}
 
@@ -220,19 +222,19 @@ We also compare \expid{E5} with \expid{E5W}, which uses a larger auxiliary weigh
 
 \subsection{Qualitative Examples}
 
-The qualitative examples should do one job: make the numerical differences easier to see. The most useful set would include one case where \expid{E3} keeps the scene or character state better than \expid{E4}, one case where \expid{E3} and \expid{E5} read similarly fluent but \expid{E5} offers no real coherence gain, and, if space allows, one case where the structured prompt helps more than the plain one.
+Qualitative examples are most useful when they make a numerical difference visible. We would therefore focus on a small set: one example where \expid{E3} preserves scene or character state better than \expid{E4}, one where \expid{E3} and \expid{E5} are similarly fluent but \expid{E5} adds no coherence benefit, and, if space allows, one example where structured prompting is visibly better than plain concatenation.
 
 \subsection{Limitations}
 
-This study has clear limits. We rely on automatic evaluation, so we do not yet have a human judgment of narrative quality. We also work in one literary domain with a small backbone, which limits how far we should generalize. One more caveat matters for the core result: the strongest long-context setting still truncates a non-trivial share of examples under the $512$-token budget. The token-budget inspection gives truncation rates of about $24.7\%$ on the training split and $17.3\%$ on the evaluation split for the $k=4$ structured setting. That does not overturn the result that \expid{E3} performs best. It does mean the gain from longer context is harder to interpret cleanly than the headline result suggests.
+This study has several limits. First, the evaluation is mostly automatic; we do not yet have human judgments of narrative quality. Second, the experiments use one literary domain and one small backbone, so the conclusions should not be read as general claims about story generation. A final caveat is more specific: the best long-context setting still truncates a noticeable share of examples under the $512$-token budget. Token-budget inspection gives truncation rates of about $24.7\%$ on the training split and $17.3\%$ on the evaluation split for the $k=4$ structured setting. This does not overturn the \expid{E3} result, but it makes the longer-context gain less clean than it first appears.
 
 \section{Conclusion}
 
-We ran a controlled set of paragraph-continuation experiments with a fixed \model{} backbone and a narrow mainline question. The answer is fairly plain. Structured formatting helps a little. Longer context helps more, and \expid{E3} is the strongest system in the mainline. LoRA is clearly worse than full fine-tuning here. The auxiliary ranking loss does not improve on the strongest baseline.
+We ran a controlled set of paragraph-continuation experiments with a fixed \model{} backbone. The main result is simple: structured formatting helps slightly, longer context helps more, and \expid{E3} is the strongest mainline system. LoRA is clearly worse than full fine-tuning in this setting. The auxiliary ranking loss also fails to improve on the best baseline.
 
-For this task and model scale, the best gains come from giving the model a better view of the preceding text. We do not see the same payoff from switching to parameter-efficient adaptation or from adding a simple auxiliary ranking loss.
+For this task and model scale, the most useful change is giving the model a better view of the preceding text. Switching to parameter-efficient adaptation, or adding the simple ranking loss used here, does not pay off.
 
-Three follow-up directions matter most. A human evaluation would tell us more than automatic metrics can. Larger backbones may change the trade-offs we see here. The appendix retrieval result also points to a narrower lesson: if retrieval is going to help, it will need better design than the simple setup we used here.
+The next steps are straightforward. Human evaluation would say more about narrative quality than ROUGE or BERTScore can. Larger backbones may also change the trade-offs, especially for LoRA. The appendix retrieval result suggests one narrower lesson as well: retrieval may still help, but not with the simple setup tested here.
 
 \section{Statement of Individual Contributions}
 
@@ -249,7 +251,7 @@ Replace the placeholders below with the actual team contribution split before su
 
 \section{Retrieval-Augmented Extension}
 
-We treat retrieval as an appendix-only comparison, not as part of the main contribution. We ran it as a separate experiment and checked it against the strongest completed mainline model. It did not win. The appendix system uses a lightweight TF-IDF retriever over earlier passages, following a classical sparse retrieval setup \citep{salton1988term}.
+Retrieval is treated as an appendix comparison rather than a main contribution. We ran it separately and compared it with the strongest completed mainline model. It did not win. The appendix system uses a lightweight TF-IDF retriever over earlier passages, following a classical sparse retrieval setup \citep{salton1988term}.
 
 \begin{table}[t]
 \caption{Appendix retrieval comparison against the strongest mainline model.}
@@ -269,7 +271,7 @@ Retrieval & 3.1759 & 27.4444 & 29.8028 & 0.1089 & 0.8325 \\
 }
 \end{table}
 
-The retrieval result is weaker than \expid{E3} on both likelihood-based and overlap-based metrics. We therefore leave it in the appendix and keep the mainline interpretation unchanged.
+The retrieval run is weaker than \expid{E3} on both likelihood-based and overlap-based metrics. We leave it in the appendix and keep the mainline interpretation unchanged.
 
 \section{Additional Experimental Details}
 

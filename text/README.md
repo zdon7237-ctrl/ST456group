@@ -9,6 +9,8 @@ This repository studies contextual coherence in Sherlock Holmes paragraph contin
 - fine-tuning strategy
 - coherence-oriented auxiliary objectives
 
+The project implementation uses PyTorch with Hugging Face Transformers and PEFT. All reported experiments were run in Google Colab to avoid local hardware and TensorFlow compatibility differences; local machines were used for code editing, lightweight checks, and report preparation.
+
 Retrieval is still available in code, but it is treated as an appendix / optional ablation rather than the main contribution.
 
 ## Main Experiment Matrix
