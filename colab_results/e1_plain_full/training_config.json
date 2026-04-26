@@ -7,19 +7,19 @@
     "aux_weight": 0.1,
     "max_target_tokens": 176,
     "num_negative_candidates": 3,
-    "selection_metric": "perplexity",
     "use_retrieval": false,
     "top_k": 0,
     "warmup_steps": 20,
     "max_grad_norm": 1.0,
+    "seed": 42,
     "model_name": "distilgpt2",
-    "train_path": "/content/ST456group/codex-novel-continuation/data/processed/train.jsonl",
-    "eval_path": "/content/ST456group/codex-novel-continuation/data/processed/val.jsonl",
-    "output_dir": "/content/ST456group/codex-novel-continuation/artifacts/e1_plain_full",
+    "train_path": "/content/ST456group/text/data/processed/train.jsonl",
+    "eval_path": "/content/ST456group/text/data/processed/val.jsonl",
+    "output_dir": "/content/ST456group/text/artifacts/e1_plain_full",
     "max_length": 512,
     "batch_size": 2,
     "gradient_accumulation_steps": 4,
-    "num_train_epochs": 1,
+    "num_train_epochs": 3,
     "learning_rate": 5e-05,
     "logging_steps": 10,
     "save_steps": 50
@@ -28,15 +28,19 @@
     "token_budget": {
       "max_target_tokens": 176,
       "train": {
-        "avg_total_tokens": 225.80548722800378,
-        "max_total_tokens": 1134.0,
-        "truncation_rate": 0.05070955534531694
+        "avg_total_tokens": 231.80491958372752,
+        "max_total_tokens": 1140.0,
+        "truncation_rate": 0.05260170293282876
       },
       "eval": {
-        "avg_total_tokens": 202.61212121212122,
-        "max_total_tokens": 877.0,
+        "avg_total_tokens": 208.61212121212122,
+        "max_total_tokens": 883.0,
         "truncation_rate": 0.04090909090909091
       }
+    },
+    "validation": {
+      "validation_main_loss": 3.101900339126587,
+      "validation_perplexity": 25.11051095860781
     }
   }
 }

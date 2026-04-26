@@ -5,13 +5,13 @@
   "max_length": 512,
   "recommended_max_target_tokens": 176,
   "train": {
-    "avg_total_tokens": 412.1774834437086,
-    "max_total_tokens": 1568.0,
-    "truncation_rate": 0.23954588457899717
+    "avg_total_tokens": 418.1769157994324,
+    "max_total_tokens": 1574.0,
+    "truncation_rate": 0.24730368968779565
   },
   "eval": {
-    "avg_total_tokens": 372.26060606060605,
-    "max_total_tokens": 1291.0,
-    "truncation_rate": 0.1696969696969697
+    "avg_total_tokens": 378.26060606060605,
+    "max_total_tokens": 1297.0,
+    "truncation_rate": 0.17272727272727273
   }
 }

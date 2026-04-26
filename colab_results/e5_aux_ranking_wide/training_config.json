@@ -1,10 +1,10 @@
 {
   "config": {
-    "context_size": 2,
+    "context_size": 4,
     "context_format": "structured",
     "training_mode": "full",
-    "aux_objective": "none",
-    "aux_weight": 0.1,
+    "aux_objective": "ranking",
+    "aux_weight": 0.2,
     "max_target_tokens": 176,
     "num_negative_candidates": 3,
     "use_retrieval": false,
@@ -15,7 +15,7 @@
     "model_name": "distilgpt2",
     "train_path": "/content/ST456group/text/data/processed/train.jsonl",
     "eval_path": "/content/ST456group/text/data/processed/val.jsonl",
-    "output_dir": "/content/ST456group/text/artifacts/e2_structured_full",
+    "output_dir": "/content/ST456group/text/artifacts/e5_aux_ranking_wide",
     "max_length": 512,
     "batch_size": 2,
     "gradient_accumulation_steps": 4,
@@ -28,19 +28,19 @@
     "token_budget": {
       "max_target_tokens": 176,
       "train": {
-        "avg_total_tokens": 247.80491958372752,
-        "max_total_tokens": 1156.0,
-        "truncation_rate": 0.06017029328287606
+        "avg_total_tokens": 418.1769157994324,
+        "max_total_tokens": 1574.0,
+        "truncation_rate": 0.24730368968779565
       },
       "eval": {
-        "avg_total_tokens": 224.61212121212122,
-        "max_total_tokens": 899.0,
-        "truncation_rate": 0.04393939393939394
+        "avg_total_tokens": 378.26060606060605,
+        "max_total_tokens": 1297.0,
+        "truncation_rate": 0.17272727272727273
       }
     },
     "validation": {
-      "validation_main_loss": 3.0997817516326904,
-      "validation_perplexity": 25.106097363270095
+      "validation_main_loss": 3.106196641921997,
+      "validation_perplexity": 25.816882265557847
     }
   }
 }
