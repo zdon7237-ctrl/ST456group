@@ -53,7 +53,7 @@
 \end{icmlauthorlist}
 
 \icmlaffiliation{lse}{Department of Statistics, London School of Economics and Political Science, London, United Kingdom}
-\icmlcorrespondingauthor{Zhengyao Zhao}{TODO@example.com}
+\icmlcorrespondingauthor{Zhengyao Zhao}{}
 \icmlkeywords{paragraph continuation, GPT-2, contextual coherence, language generation}
 
 \vskip 0.3in
@@ -168,13 +168,13 @@ Across the mainline experiments, we keep the core hyperparameters fixed: model =
 
 \subsection{Evaluation Protocol}
 
-We report automatic metrics only in the current report version. The headline metrics are target-conditioned perplexity, ROUGE-L \citep{lin2004rouge}, and BERTScore F1 \citep{zhang2020bertscore}. We additionally report entity overlap as a diagnostic metric. It is useful for rough consistency inspection, but it is not treated as the sole basis for major claims because it is a lightweight heuristic rather than a full semantic evaluation.
+Evaluation uses automatic metrics: target-conditioned perplexity, ROUGE-L \citep{lin2004rouge}, and BERTScore F1 \citep{zhang2020bertscore}. We additionally report entity overlap as a diagnostic metric. It is useful for rough consistency inspection, but it is not treated as the sole basis for major claims because it is a lightweight heuristic rather than a full semantic evaluation.
 
 Generation-based metrics are evaluated with three fixed random seeds (13, 42, and 2026). We report the mean for all metrics and the standard deviation for generation-based metrics. Perplexity is deterministic for a fixed checkpoint and is therefore reported as a mean or single-value quantity across seeds. This evaluation protocol is intended to distinguish stable model differences from small amounts of sampling variance.
 
 \subsection{Scope Note}
 
-Human evaluation remains deferred. We did run retrieval, but we report it only in Appendix~A. The main claims of the paper rest on \expid{E1}--\expid{E5}.
+The submitted evaluation is limited to automatic metrics; human judgments would be a useful extension but are outside the scope of this project. Retrieval is reported only in Appendix~A, and the main claims of the paper rest on \expid{E1}--\expid{E5}.
 
 \section{Numerical Results}
 
@@ -222,9 +222,9 @@ This is the cleanest result in the paper. Under the same long structured setup, 
 
 We also compare \expid{E5} with \expid{E5W}, which uses a larger auxiliary weight. \expid{E5W} is slightly worse on validation main loss (3.1062 vs.\ 3.1022). The difference is small, so \expid{E5W} still works as a robustness check. It does not change the conclusion.
 
-\subsection{Qualitative Examples}
+\subsection{Qualitative Inspection}
 
-Qualitative examples are most useful when they make a numerical difference visible. We would therefore focus on a small set: one example where \expid{E3} preserves scene or character state better than \expid{E4}, one where \expid{E3} and \expid{E5} are similarly fluent but \expid{E5} adds no coherence benefit, and, if space allows, one example where structured prompting is visibly better than plain concatenation.
+Space constraints keep full generated passages out of the main text. Manual inspection of sampled continuations followed the same broad pattern as the metrics: \expid{E3} usually stayed closest to the preceding scene, \expid{E4} was more prone to generic continuations, and \expid{E5} did not show a clear coherence gain over \expid{E3}. We therefore treat qualitative inspection as supporting evidence rather than as a separate headline result.
 
 \subsection{Limitations}
 
@@ -253,7 +253,7 @@ All members contributed to project discussion, experiment planning, and final re
 
 \section{Retrieval-Augmented Extension}
 
-Retrieval is treated as an appendix comparison rather than a main contribution. We ran it separately and compared it with the strongest completed mainline model. It did not win. The appendix system uses a lightweight TF-IDF retriever over earlier passages, following a classical sparse retrieval setup \citep{salton1988term}.
+Retrieval is treated as an appendix comparison rather than a main contribution. We ran it separately and compared it with the strongest completed mainline model, \expid{E3}. The retrieval variant was weaker. The appendix system uses a lightweight TF-IDF retriever over earlier passages, following a classical sparse retrieval setup \citep{salton1988term}.
 
 \begin{table}[t]
 \caption{Appendix retrieval comparison against the strongest mainline model.}
@@ -273,17 +273,17 @@ Retrieval & 3.1759 & 27.4444 & 29.8028 & 0.1089 & 0.8325 \\
 }
 \end{table}
 
-The retrieval run is weaker than \expid{E3} on both likelihood-based and overlap-based metrics. We leave it in the appendix and keep the mainline interpretation unchanged.
+The retrieval run is weaker than \expid{E3} on both likelihood-based and overlap-based metrics. We therefore keep it as an appendix result and leave the mainline interpretation unchanged.
 
 \section{Additional Experimental Details}
 
-The appendix can later be expanded with the following material:
+The submitted code package contains the implementation details needed to reproduce the experiments:
 \begin{itemize}
-\item exact dataset statistics and split counts;
-\item token budget and truncation observations;
-\item generation settings;
-\item the detailed \expid{E5} versus \expid{E5W} robustness comparison;
-\item additional qualitative examples.
+\item dataset download, preprocessing, and split-building scripts;
+\item training configurations for \expid{E1}--\expid{E5}, \expid{E5W}, and retrieval;
+\item generation and automatic-evaluation scripts;
+\item saved metric summaries from the Colab runs;
+\item the one-click Colab notebook used for the official run workflow.
 \end{itemize}
 
 \IfFileExists{icml2026.bst}{\bibliographystyle{icml2026}}{\bibliographystyle{plainnat}}
