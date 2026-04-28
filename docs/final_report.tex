@@ -6,7 +6,7 @@
 \newif\ificmlstyle
 \IfFileExists{icml2026.sty}{
   \icmlstyletrue
-  \usepackage[accepted]{icml2026}
+  \usepackage[preprint]{icml2026}
 }{
   \icmlstylefalse
   \usepackage[a4paper,margin=0.75in]{geometry}
@@ -34,11 +34,15 @@
 \setlength{\columnsep}{0.28in}
 \setlength{\emergencystretch}{2em}
 
-\newcommand{\model}{\texttt{distilgpt2}}
+\newcommand{\model}{\mbox{\normalfont distilgpt2}}
 \newcommand{\expid}[1]{\textsc{#1}}
 \newcommand{\traincount}{5285}
 \newcommand{\valcount}{660}
 \newcommand{\testcount}{663}
+
+\ificmlstyle
+\icmltitlerunning{Sherlock Holmes Paragraph Continuation via GPT-2 Fine-Tuning}
+\fi
 
 \begin{document}
 
@@ -192,35 +196,35 @@ Table~\ref{tab:results} summarizes the mainline results. Test metrics are report
 \toprule
 Experiment & Validation Main Loss & Validation PPL & Test PPL & ROUGE-L & BERTScore F1 & Entity Overlap \\
 \midrule
-\expid{E1} & 3.1019 & 25.1105 & 27.8093 & $0.1113 \pm 0.0009$ & $0.8341 \pm 0.0004$ & $0.1435 \pm 0.0031$ \\
-\expid{E2} & 3.0998 & 25.1061 & 27.8216 & $0.1124 \pm 0.0002$ & $0.8343 \pm 0.0001$ & $0.1434 \pm 0.0025$ \\
-\expid{E3} & 3.0860 & 25.0467 & 27.6525 & $0.1115 \pm 0.0003$ & $0.8343 \pm 0.0004$ & $0.1266 \pm 0.0008$ \\
-\expid{E4} & 3.2966 & 30.3848 & 32.6382 & $0.1097 \pm 0.0005$ & $0.8329 \pm 0.0004$ & $0.1275 \pm 0.0039$ \\
-\expid{E5} & 3.1022 & 25.6313 & 28.2869 & $0.1113 \pm 0.0012$ & $0.8343 \pm 0.0002$ & $0.1207 \pm 0.0014$ \\
+\expid{E1} & 3.1008 & 25.0981 & 27.8239 & $0.1105 \pm 0.0009$ & $0.8339 \pm 0.0001$ & $0.1432 \pm 0.0078$ \\
+\expid{E2} & 3.1001 & 25.1064 & 27.8098 & $0.1105 \pm 0.0006$ & $0.8342 \pm 0.0002$ & $0.1401 \pm 0.0055$ \\
+\expid{E3} & 3.0867 & 25.0427 & 27.6488 & $0.1105 \pm 0.0009$ & $0.8342 \pm 0.0003$ & $0.1233 \pm 0.0021$ \\
+\expid{E4} & 3.2964 & 30.3667 & 32.6113 & $0.1102 \pm 0.0009$ & $0.8329 \pm 0.0004$ & $0.1288 \pm 0.0051$ \\
+\expid{E5} & 3.1010 & 25.6218 & 28.3570 & $0.1106 \pm 0.0008$ & $0.8343 \pm 0.0001$ & $0.1230 \pm 0.0007$ \\
 \bottomrule
 \end{tabular}%
 }
 \end{table*}
 
-For robustness checking, \expid{E5W} achieves a validation main loss of 3.1062, validation perplexity of 25.8169, test perplexity of 28.5020, ROUGE-L of $0.1111 \pm 0.0007$, BERTScore F1 of $0.8343 \pm 0.0003$, and entity overlap of $0.1231 \pm 0.0041$. Because it does not improve the validation-side selection criterion relative to \expid{E5}, it is not used as the main auxiliary result in Table~\ref{tab:results}.
+For robustness checking, \expid{E5W} achieves a validation main loss of 3.1059, validation perplexity of 25.8079, test perplexity of 28.5527, ROUGE-L of $0.1118 \pm 0.0009$, BERTScore F1 of $0.8345 \pm 0.0003$, and entity overlap of $0.1257 \pm 0.0033$. Because it does not improve the validation-side selection criterion relative to \expid{E5}, it is not used as the main auxiliary result in Table~\ref{tab:results}.
 
 \subsection{Pairwise Analysis}
 
 \paragraph{\expid{E1} vs.\ \expid{E2}: input structure.}
-\expid{E2} is a little better than \expid{E1}, but the gap is small. ROUGE-L rises from 0.1113 to 0.1124, BERTScore moves from 0.8341 to 0.8343, and validation main loss drops from 3.1019 to 3.0998. That is enough to say the structured format helps. It is not enough to claim a large change in quality.
+\expid{E2} is close to \expid{E1}, with a small validation-side gain. ROUGE-L is almost unchanged at 0.1105, BERTScore moves from 0.8339 to 0.8342, and validation main loss drops from 3.1008 to 3.1001. That is enough to say the structured format helps a little. It is not enough to claim a large change in quality.
 
 \paragraph{\expid{E2} vs.\ \expid{E3}: context length.}
-\expid{E3} is the best model in the mainline. It has the lowest validation main loss (3.0860), the lowest validation perplexity (25.0467), and the lowest test perplexity (27.6525). ROUGE-L and BERTScore stay close to \expid{E2}, so the gain shows up more clearly in the likelihood-based metrics than in surface-overlap metrics. Even so, the direction is consistent enough to support the longer context setting.
+\expid{E3} is the best model in the mainline. It has the lowest validation main loss (3.0867), the lowest validation perplexity (25.0427), and the lowest test perplexity (27.6488). ROUGE-L and BERTScore stay close to \expid{E2}, so the gain shows up more clearly in the likelihood-based metrics than in surface-overlap metrics. Even so, the direction is consistent enough to support the longer context setting.
 
 \paragraph{\expid{E3} vs.\ \expid{E4}: full fine-tuning vs.\ LoRA.}
-This is the cleanest result in the paper. Under the same long structured setup, LoRA falls well behind full fine-tuning. Validation main loss rises from 3.0860 to 3.2966, test perplexity jumps from 27.6525 to 32.6382, and the overlap metrics drop as well. In this task, with this backbone, full tuning is simply the better choice.
+This is the cleanest result in the paper. Under the same long structured setup, LoRA falls well behind full fine-tuning. Validation main loss rises from 3.0867 to 3.2964, test perplexity jumps from 27.6488 to 32.6113, and BERTScore drops as well. In this task, with this backbone, full tuning is the better choice.
 
 \paragraph{\expid{E3} vs.\ \expid{E5}: auxiliary ranking objective.}
-\expid{E5} does not beat \expid{E3}. Its validation main loss is higher (3.1022 vs.\ 3.0860), its validation perplexity is higher (25.6313 vs.\ 25.0467), and its test perplexity is higher (28.2869 vs.\ 27.6525). ROUGE-L and BERTScore barely move, while entity overlap drops. The safest reading is that the ranking loss does not help in its current form.
+\expid{E5} does not beat \expid{E3}. Its validation main loss is higher (3.1010 vs.\ 3.0867), its validation perplexity is higher (25.6218 vs.\ 25.0427), and its test perplexity is higher (28.3570 vs.\ 27.6488). ROUGE-L and BERTScore barely move, while entity overlap is about the same. The ranking loss does not help in its current form.
 
 \subsection{\expid{E5} Robustness Note}
 
-We also compare \expid{E5} with \expid{E5W}, which uses a larger auxiliary weight. \expid{E5W} is slightly worse on validation main loss (3.1062 vs.\ 3.1022). The difference is small, so \expid{E5W} still works as a robustness check. It does not change the conclusion.
+We also compare \expid{E5} with \expid{E5W}, which uses a larger auxiliary weight. \expid{E5W} is slightly worse on validation main loss (3.1059 vs.\ 3.1010). The difference is small, so \expid{E5W} still works as a robustness check. It does not change the conclusion.
 
 \subsection{Qualitative Inspection}
 
@@ -266,8 +270,8 @@ Retrieval is treated as an appendix comparison rather than a main contribution. 
 \toprule
 Model & Val Loss & Val PPL & Test PPL & ROUGE & BERT \\
 \midrule
-\expid{E3} & 3.0860 & 25.0467 & 27.6525 & 0.1115 $\pm$ 0.0003 & 0.8343 $\pm$ 0.0004 \\
-Retrieval & 3.1759 & 27.4444 & 29.8028 & 0.1089 & 0.8325 \\
+\expid{E3} & 3.0867 & 25.0427 & 27.6488 & 0.1105 $\pm$ 0.0009 & 0.8342 $\pm$ 0.0003 \\
+Retrieval & 3.1752 & 27.3757 & 29.7175 & 0.1105 & 0.8325 \\
 \bottomrule
 \end{tabular}%
 }

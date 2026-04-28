@@ -1,0 +1,46 @@
+{
+  "config": {
+    "context_size": 4,
+    "context_format": "structured",
+    "training_mode": "full",
+    "aux_objective": "ranking",
+    "aux_weight": 0.2,
+    "max_target_tokens": 176,
+    "num_negative_candidates": 3,
+    "use_retrieval": false,
+    "top_k": 0,
+    "warmup_steps": 20,
+    "max_grad_norm": 1.0,
+    "seed": 42,
+    "model_name": "distilgpt2",
+    "train_path": "/content/ST456group/text/data/processed/train.jsonl",
+    "eval_path": "/content/ST456group/text/data/processed/val.jsonl",
+    "output_dir": "/content/ST456group/text/artifacts/e5_aux_ranking_wide",
+    "max_length": 512,
+    "batch_size": 2,
+    "gradient_accumulation_steps": 4,
+    "num_train_epochs": 3,
+    "learning_rate": 5e-05,
+    "logging_steps": 10,
+    "save_steps": 50
+  },
+  "metadata": {
+    "token_budget": {
+      "max_target_tokens": 176,
+      "train": {
+        "avg_total_tokens": 418.18107852412487,
+        "max_total_tokens": 1574.0,
+        "truncation_rate": 0.24730368968779565
+      },
+      "eval": {
+        "avg_total_tokens": 378.26060606060605,
+        "max_total_tokens": 1297.0,
+        "truncation_rate": 0.17272727272727273
+      }
+    },
+    "validation": {
+      "validation_main_loss": 3.1059329509735107,
+      "validation_perplexity": 25.8078736722211
+    }
+  }
+}

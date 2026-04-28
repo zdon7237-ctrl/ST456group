@@ -1,0 +1,17 @@
+{
+  "config_path": "configs/e1_distilgpt2_plain_full.yaml",
+  "model_name": "distilgpt2",
+  "context_format": "plain",
+  "max_length": 512,
+  "recommended_max_target_tokens": 176,
+  "train": {
+    "avg_total_tokens": 231.80756859035006,
+    "max_total_tokens": 1140.0,
+    "truncation_rate": 0.05260170293282876
+  },
+  "eval": {
+    "avg_total_tokens": 208.61212121212122,
+    "max_total_tokens": 883.0,
+    "truncation_rate": 0.04090909090909091
+  }
+}
