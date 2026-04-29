@@ -1,16 +1,6 @@
 # AI Statement for ST456 Project
 
-## Version 2
-
-AI Statement
-
-We used generative AI tools only in a limited supporting role for this ST456 project on contextual coherence in Sherlock Holmes paragraph continuation via GPT-2 fine-tuning.
-
-AI tools were used in a supporting role for tasks such as:
-- polishing the wording and grammar of parts of the written report;
-- improving the readability of documentation and Colab notebook instructions;
-- suggesting possible debugging directions for dataset preprocessing, training configuration, and evaluation scripts;
-
+We used AI tools in two ways during this project. First, we used AI to receive suggestions on dataset preprocessing and training configuration, such as suggestions on how to structure the preprocessing workflow and organize training settings. Second, we used AI to help debug code errors, such as identifying possible causes of errors and suggesting possible fixes.
 
 AI tools were not used to generate the main academic contribution of the project. The project topic, the design of the paragraph-continuation task, the preprocessing of Sherlock Holmes texts, the experiment configurations for GPT-2 and DistilGPT-2 fine-tuning, the evaluation pipeline, the analysis of results, and the final conclusions were completed and checked by the group members.
 
