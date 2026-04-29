@@ -28,7 +28,7 @@
     "token_budget": {
       "max_target_tokens": 176,
       "train": {
-        "avg_total_tokens": 418.1769157994324,
+        "avg_total_tokens": 418.18107852412487,
         "max_total_tokens": 1574.0,
         "truncation_rate": 0.24730368968779565
       },
@@ -39,8 +39,8 @@
       }
     },
     "validation": {
-      "validation_main_loss": 3.102243661880493,
-      "validation_perplexity": 25.631321839230967
+      "validation_main_loss": 3.100977659225464,
+      "validation_perplexity": 25.62177381726675
     }
   }
 }
